@@ -1,0 +1,721 @@
+{
+  "findings": [
+    {
+      "question_numbers": [
+        1
+      ],
+      "snippet_text": "-s --schema-only",
+      "web_sources": [],
+      "keywords": [
+        "-s",
+        "--schema-only",
+        "pg_dump",
+        "metadados",
+        "esquema"
+      ]
+    },
+    {
+      "question_numbers": [
+        1
+      ],
+      "snippet_text": "Salva somente o esquema (definições dos dados), não os dados.",
+      "web_sources": [],
+      "keywords": [
+        "-s",
+        "--schema-only",
+        "esquema",
+        "metadados"
+      ]
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Você pode arquivar os segmentos manualmente, o que é sujeito a erros, ou pode ativar o arquivamento no servidor. Para tanto, é necessário configurar três opções do postgresql.conf:",
+      "web_sources": [],
+      "keywords": [
+        "postgresql.conf",
+        "arquivamento",
+        "segmentos wal",
+        "wal_level",
+        "archive_mode",
+        "archive_command"
+      ]
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "wal_level = opção",
+      "web_sources": [],
+      "keywords": [
+        "wal_level",
+        "postgresql.conf"
+      ]
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Deve ser definido como archive ou hot_standby, pois a duas permitem o arquivamento do log.",
+      "web_sources": [],
+      "keywords": [
+        "wal_level",
+        "archive",
+        "hot_standby",
+        "arquivamento"
+      ]
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "archive_mode = on",
+      "web_sources": [],
+      "keywords": [
+        "archive_mode",
+        "postgresql.conf"
+      ]
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Precisa estar ligado para podermos executar o comando de arquivamento.",
+      "web_sources": [],
+      "keywords": [
+        "archive_mode",
+        "arquivamento"
+      ]
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "archive_command= 'texto'",
+      "web_sources": [],
+      "keywords": [
+        "archive_command",
+        "postgresql.conf"
+      ]
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Onde texto deve ser um comando de cópia de arquivos do sistema operacional.",
+      "web_sources": [],
+      "keywords": [
+        "archive_command",
+        "cópia de arquivos"
+      ]
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "A configuração de arquivamento somente entrará em vigor após o reinício do PostgreSQL.",
+      "web_sources": [],
+      "keywords": [
+        "arquivamento",
+        "reinício do PostgreSQL",
+        "postgresql.conf"
+      ]
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "Prevenção de falhas devido ao reinício do ID de transação",
+      "web_sources": [],
+      "keywords": [
+        "reinício do ID de transação",
+        "transações",
+        "XID"
+      ]
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "Esta volta a zero do XID pode gerar um efeito colateral, pois transações que deveriam estar no futuro (XID grande) agora estão no início (XID pequeno) e o MVCC poderia não mais funcionar direito.",
+      "web_sources": [],
+      "keywords": [
+        "volta a zero do XID",
+        "transações",
+        "XID",
+        "MVCC"
+      ]
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "A solução para isso é executar um VACUMM em cada tabela a cada, pelo menos, um bilhão de transações.",
+      "web_sources": [],
+      "keywords": [
+        "VACUMM",
+        "transações",
+        "reinício de XID"
+      ]
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "Esta limpeza provoca o congelamento (FREEZE) das linhas antigas, que nada mais é que a sinalização por um flag que aquela linha sempre está no passado de qualquer transação.",
+      "web_sources": [],
+      "keywords": [
+        "congelamento",
+        "FREEZE",
+        "VACUUM FREEZE",
+        "linhas antigas"
+      ]
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "O congelamento resolve o problema, pois indica que as linhas foram inseridas por uma transação que foi confirmada suficientemente longe no passado e que os efeitos desta transação são visíveis para todas as transações atuais e futuras.",
+      "web_sources": [],
+      "keywords": [
+        "congelamento",
+        "FREEZE",
+        "transação"
+      ]
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "Existe, ainda, para o comando VACUMM, a opção FREEZE, que acarreta a utilização de uma política mais agressiva que congela todas as versões das linhas consideradas antigas o suficiente para serem consideradas boas para todas as transações em aberto.",
+      "web_sources": [],
+      "keywords": [
+        "VACUMM",
+        "FREEZE",
+        "VACUUM FREEZE",
+        "congelamento"
+      ]
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "FREEZE — Realiza um congelamento agressivo das tuplas. Quando selecionado FULL, o congelamento é realizado implícitamente.",
+      "web_sources": [],
+      "keywords": [
+        "FREEZE",
+        "congelamento agressivo",
+        "tuplas"
+      ]
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "3. Congelando as linhas do banco: VACUUM FREEZE;",
+      "web_sources": [],
+      "keywords": [
+        "VACUUM FREEZE",
+        "congelamento"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "O PostgreSQL nos oferece três formas para realizar o backup dos dados de seus bancos:",
+      "web_sources": [],
+      "keywords": [
+        "cópia de segurança",
+        "backup",
+        "PostgreSQL"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Método SQL— dump.",
+      "web_sources": [],
+      "keywords": [
+        "Método SQL— dump",
+        "cópia de segurança"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Cópia de segurança no nível de sistema de arquivos.",
+      "web_sources": [],
+      "keywords": [
+        "Cópia de segurança no nível de sistema de arquivos"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Cópia de segurança contínua.",
+      "web_sources": [],
+      "keywords": [
+        "Cópia de segurança contínua"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Este método tem como ideia gerar um arquivo texto com os comandos SQL, que ao serem submetidos ao servidor, recriam o banco de dados como ele estava no momento em que o arquivo foi gerado.",
+      "web_sources": [],
+      "keywords": [
+        "cópia de segurança",
+        "arquivo texto",
+        "comandos SQL"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Para fazer esta cópia, o PostgreSQL disponibiliza o utilitário pg_dump, que nada mais é do que um cliente normal de banco de dados, portanto, pode ser comandado de qualquer host remoto que tenha permissão de acesso ao banco de dados.",
+      "web_sources": [],
+      "keywords": [
+        "cópia de segurança",
+        "pg_dump"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "-f arquivo --file=arquivo",
+      "web_sources": [],
+      "keywords": [
+        "-f arquivo",
+        "--file=arquivo",
+        "cópia de segurança"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Envia a saída para o arquivo especificado. Se for omitido, é usada a saída padrão.",
+      "web_sources": [],
+      "keywords": [
+        "cópia de segurança",
+        "arquivo especificado"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Para gerar o dump de um tabela ou banco de dados no pgAdmin4, clique com o botão direito no seu nome e escolha backup. Na sequência, execute os passos indicados abaixo.",
+      "web_sources": [],
+      "keywords": [
+        "pgAdmin4",
+        "backup",
+        "dump",
+        "cópia de segurança"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Na janela que for aberta, você deve, na aba General, definir o nome do arquivo/local do arquivo, o formato (custom ou tar para pg_restore ou plain para sql).",
+      "web_sources": [],
+      "keywords": [
+        "pgAdmin4",
+        "backup",
+        "nome do arquivo"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Este método utiliza os recursos de cópia de arquivos do sistema operacional para fazer o backup. Sua ideia básica é copiar todos os arquivos do cluster para outro disco ou meio de armazenamento diferente.",
+      "web_sources": [],
+      "keywords": [
+        "cópia de arquivos",
+        "backup",
+        "cópia de segurança"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Para fazermos o backup base, devemos usar a ferramenta pg_basebackup ou realizá-lo de forma manual.",
+      "web_sources": [],
+      "keywords": [
+        "backup base",
+        "pg_basebackup",
+        "cópia de segurança"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "O pg_basebackup é usado para fazer backups básicos de um cluster de banco de dados PostgreSQL em execução.",
+      "web_sources": [],
+      "keywords": [
+        "pg_basebackup",
+        "backups básicos",
+        "cópia de segurança"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Realize a cópia de segurança através das ferramentas do SO, copiando os arquivos.",
+      "web_sources": [],
+      "keywords": [
+        "cópia de segurança",
+        "ferramentas do SO"
+      ]
+    },
+    {
+      "question_numbers": [
+        5
+      ],
+      "snippet_text": "Além destes recursos básicos, você também pode obter informações detalhadas dos objetos através do menu de contexto na lista de objetos.",
+      "web_sources": [],
+      "keywords": [
+        "menu de contexto",
+        "pgAdmin4"
+      ]
+    },
+    {
+      "question_numbers": [
+        5
+      ],
+      "snippet_text": "Para realizar a limpeza no pgAdmin4, clique com o botão direito no nome do banco e selecione Maintenance",
+      "web_sources": [],
+      "keywords": [
+        "pgAdmin4",
+        "Maintenance",
+        "limpeza",
+        "botão direito"
+      ]
+    },
+    {
+      "question_numbers": [
+        5
+      ],
+      "snippet_text": "Na janela que se abrir, selecione VACUUM, marque as opções desejadas e clique em OK",
+      "web_sources": [],
+      "keywords": [
+        "Maintenance",
+        "VACUUM",
+        "pgAdmin4"
+      ]
+    },
+    {
+      "question_numbers": [
+        5
+      ],
+      "snippet_text": "Para realizar para um tabela, clique com o botão direito no nome da tabela e escolha Maintenance",
+      "web_sources": [],
+      "keywords": [
+        "pgAdmin4",
+        "Maintenance",
+        "botão direito"
+      ]
+    },
+    {
+      "question_numbers": [
+        6
+      ],
+      "snippet_text": "-a",
+      "web_sources": [],
+      "keywords": [
+        "pg_restore",
+        "-a"
+      ]
+    },
+    {
+      "question_numbers": [
+        6
+      ],
+      "snippet_text": "Restaura apenas os dados, não o esquema (definições de dados).",
+      "web_sources": [],
+      "keywords": [
+        "pg_restore",
+        "-a",
+        "restaura apenas os dados"
+      ]
+    },
+    {
+      "question_numbers": [
+        6
+      ],
+      "snippet_text": "-s --schema-only",
+      "web_sources": [],
+      "keywords": [
+        "pg_restore",
+        "-s --schema-only"
+      ]
+    },
+    {
+      "question_numbers": [
+        6
+      ],
+      "snippet_text": "Restaura apenas o esquema (definições de dados), não dados.",
+      "web_sources": [],
+      "keywords": [
+        "pg_restore",
+        "-s --schema-only"
+      ]
+    },
+    {
+      "question_numbers": [
+        7
+      ],
+      "snippet_text": "VACUUM [ FULL | FREEZE ] [ VERBOSE ] [ tabela ]",
+      "web_sources": [],
+      "keywords": [
+        "VACUUM",
+        "VERBOSE",
+        "VACUUM VERBOSE"
+      ]
+    },
+    {
+      "question_numbers": [
+        7
+      ],
+      "snippet_text": "VERBOSE — Mostra, para cada tabela, um relatório detalhado da atividade de limpeza.",
+      "web_sources": [],
+      "keywords": [
+        "VERBOSE",
+        "atividade de limpeza",
+        "relatório detalhado"
+      ]
+    },
+    {
+      "question_numbers": [
+        7
+      ],
+      "snippet_text": "Tabela — O nome (opcionalmente qualificado pelo esquema) da tabela específica a ser limpa. Por padrão, todas as tabelas do banco de dados corrente.",
+      "web_sources": [],
+      "keywords": [
+        "VACUUM",
+        "limpeza"
+      ]
+    },
+    {
+      "question_numbers": [
+        7
+      ],
+      "snippet_text": "1. Realizar a limpeza no banco de dados: VACUUM;",
+      "web_sources": [],
+      "keywords": [
+        "limpeza",
+        "VACUUM"
+      ]
+    },
+    {
+      "question_numbers": [
+        7
+      ],
+      "snippet_text": "5. Realizando a limpeza em uma tabela e gerando relatório: VACUUM VERBOSE public.exemplo;",
+      "web_sources": [],
+      "keywords": [
+        "limpeza",
+        "VACUUM VERBOSE"
+      ]
+    },
+    {
+      "question_numbers": [
+        7
+      ],
+      "snippet_text": "VACUUM VERBOSE public.exemplo;",
+      "web_sources": [],
+      "keywords": [
+        "VACUUM VERBOSE"
+      ]
+    },
+    {
+      "question_numbers": [
+        8
+      ],
+      "snippet_text": "-F formato --format=formato",
+      "web_sources": [],
+      "keywords": [
+        "-F formato",
+        "--format=formato",
+        "personalizado"
+      ]
+    },
+    {
+      "question_numbers": [
+        8
+      ],
+      "snippet_text": "Seleciona o formato da saída. O formato pode ser um dos seguintes:",
+      "web_sources": [],
+      "keywords": [
+        "formato da saída",
+        "personalizado"
+      ]
+    },
+    {
+      "question_numbers": [
+        8
+      ],
+      "snippet_text": "c",
+      "web_sources": [],
+      "keywords": [
+        "-F",
+        "formato personalizado",
+        "custom"
+      ]
+    },
+    {
+      "question_numbers": [
+        8
+      ],
+      "snippet_text": "Gera um arquivo personalizado adequado para servir de entrada para o pg_restore. Este é o formato mais flexível.",
+      "web_sources": [],
+      "keywords": [
+        "arquivo personalizado",
+        "pg_restore",
+        "formato mais flexível"
+      ]
+    },
+    {
+      "question_numbers": [
+        9
+      ],
+      "snippet_text": "Você já foi apresentado ao catálogo do PostgreSQL, suas principais tabelas e visões, bem como teve acesso aos comentários sobre a existência das visões estatísticas que contêm informações de acesso aos objetos.",
+      "web_sources": [],
+      "keywords": [
+        "catálogo do PostgreSQL",
+        "visões estatísticas",
+        "informações de acesso aos objetos"
+      ]
+    },
+    {
+      "question_numbers": [
+        9
+      ],
+      "snippet_text": "pg_stat_all_tables",
+      "web_sources": [],
+      "keywords": [
+        "pg_stat_all_tables",
+        "catálogo do PostgreSQL"
+      ]
+    },
+    {
+      "question_numbers": [
+        9
+      ],
+      "snippet_text": "Para cada tabela do banco de dados, mostra informações de acesso e funcionamento.",
+      "web_sources": [],
+      "keywords": [
+        "pg_stat_all_tables",
+        "informações de acesso"
+      ]
+    },
+    {
+      "question_numbers": [
+        9
+      ],
+      "snippet_text": "pg_stat_database",
+      "web_sources": [],
+      "keywords": [
+        "pg_stat_database",
+        "catálogo do PostgreSQL"
+      ]
+    },
+    {
+      "question_numbers": [
+        9
+      ],
+      "snippet_text": "Mostra informações de acesso e funcionamento do banco de dados.",
+      "web_sources": [],
+      "keywords": [
+        "pg_stat_database",
+        "informações de acesso"
+      ]
+    },
+    {
+      "question_numbers": [
+        10
+      ],
+      "snippet_text": "Para que o servidor do PostgreSQL possa funcionar sem problemas, algumas poucas tarefas de manutenção devem ser feitas regularmente.",
+      "web_sources": [],
+      "keywords": [
+        "tarefas de manutenção",
+        "PostgreSQL"
+      ]
+    },
+    {
+      "question_numbers": [
+        10
+      ],
+      "snippet_text": "Estas tarefas são naturalmente repetitivas, podendo ser automatizadas via scripts de SO.",
+      "web_sources": [],
+      "keywords": [
+        "tarefas de manutenção",
+        "scripts de SO",
+        "automatizadas"
+      ]
+    },
+    {
+      "question_numbers": [
+        10
+      ],
+      "snippet_text": "As principais tarefas são:",
+      "web_sources": [],
+      "keywords": [
+        "tarefas de manutenção",
+        "principais tarefas"
+      ]
+    },
+    {
+      "question_numbers": [
+        10
+      ],
+      "snippet_text": "Atualização das estatísticas.",
+      "web_sources": [],
+      "keywords": [
+        "tarefas de manutenção",
+        "Atualização das estatísticas",
+        "scripts de SO"
+      ]
+    },
+    {
+      "question_numbers": [
+        10
+      ],
+      "snippet_text": "Realizar a limpeza periódica (vacuum).",
+      "web_sources": [],
+      "keywords": [
+        "tarefas de manutenção",
+        "limpeza periódica",
+        "vacuum",
+        "scripts de SO"
+      ]
+    },
+    {
+      "question_numbers": [
+        10
+      ],
+      "snippet_text": "Realizar cópia de segurança dos bancos (backup)",
+      "web_sources": [],
+      "keywords": [
+        "tarefas de manutenção",
+        "cópia de segurança dos bancos",
+        "backup",
+        "scripts de SO"
+      ]
+    }
+  ],
+  "unanswered_questions": []
+}

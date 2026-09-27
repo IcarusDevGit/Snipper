@@ -1,0 +1,289 @@
+{
+  "findings": [
+    {
+      "question_numbers": [
+        1
+      ],
+      "snippet_text": "3. #Permitir qualquer usuário de hosts das redes 192.168.10.0/24 se conectem ao banco.",
+      "web_sources": [],
+      "keywords": [
+        "pg_hba.conf",
+        "host",
+        "md5"
+      ]
+    },
+    {
+      "question_numbers": [
+        1
+      ],
+      "snippet_text": "host\ttemplate1\tall\t192.168.10.0/24\t md5",
+      "web_sources": [],
+      "keywords": [
+        "host",
+        "md5",
+        "pg_hba.conf"
+      ]
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Vamos, agora, conceder as permissões de SELECT e INSERT sobre ela para o usuário teste1.",
+      "web_sources": [],
+      "keywords": [
+        "GRANT",
+        "SELECT",
+        "INSERT",
+        "permissões"
+      ]
+    },
+    {
+      "question_numbers": [
+        10,
+        2
+      ],
+      "snippet_text": "GRANT { { SELECT | INSERT | UPDATE | DELETE | RULE | REFERENCES | TRIGGER }",
+      "web_sources": [],
+      "keywords": [
+        "GRANT",
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE",
+        "RULE",
+        "REFERENCES",
+        "TRIGGER"
+      ]
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "Cada registro lançado no WAL recebe um LSN (log sequence number), número de sequência de log, que corresponde a um deslocamento em bytes a partir do início do segmento.",
+      "web_sources": [],
+      "keywords": [
+        "WAL",
+        "LSN",
+        "log sequence number",
+        "segmento"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "local\tConexões locais do próprio servidor.",
+      "web_sources": [],
+      "keywords": [
+        "type",
+        "local",
+        "host",
+        "hostssl",
+        "pg_hba.conf"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "host\tConexões por IP, com ou sem SSL.",
+      "web_sources": [],
+      "keywords": [
+        "type",
+        "host",
+        "SSL",
+        "pg_hba.conf"
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "hostssl\tConexões IP com SSL.",
+      "web_sources": [],
+      "keywords": [
+        "type",
+        "hostssl",
+        "SSL",
+        "pg_hba.conf"
+      ]
+    },
+    {
+      "question_numbers": [
+        5
+      ],
+      "snippet_text": "O comando GRANT concede privilégios para um ou mais usuários ou grupos de usuários (roles) sobre objetos (tabela, visão, sequência, banco de dados, função, linguagem procedural, esquema ou espaço de tabelas).",
+      "web_sources": [],
+      "keywords": [
+        "GRANT",
+        "role",
+        "privilégios"
+      ]
+    },
+    {
+      "question_numbers": [
+        5
+      ],
+      "snippet_text": "Para conceder uma role a outra, usamos comando Grant como neste exemplo:",
+      "web_sources": [],
+      "keywords": [
+        "GRANT",
+        "role"
+      ]
+    },
+    {
+      "question_numbers": [
+        6
+      ],
+      "snippet_text": "Se uma transação de consulta tem XID menor que o XID do último registro da linha, isso significa que ele começou antes da alteração. O SGBD procura, então, nas tabelas a entrada desta linha com XID anterior ao da consulta e retorna os valores existentes naquele momento do tempo.",
+      "web_sources": [],
+      "keywords": [
+        "MVCC",
+        "XID",
+        "transação",
+        "consulta"
+      ]
+    },
+    {
+      "question_numbers": [
+        7
+      ],
+      "snippet_text": "CREATE DATABASE teste2 WITH ENCODING=SQL_ASCII TEMPLATE=template0;",
+      "web_sources": [],
+      "keywords": [
+        "CREATE DATABASE",
+        "SQL_ASCII",
+        "TEMPLATE",
+        "template0",
+        "ENCODING"
+      ]
+    },
+    {
+      "question_numbers": [
+        7
+      ],
+      "snippet_text": "Criamos, então, um banco chamado teste2 como conjunto SQL_ASCII baseado no template0 enquanto o encoding do cluster é UTF8.",
+      "web_sources": [],
+      "keywords": [
+        "SQL_ASCII",
+        "template0",
+        "UTF8"
+      ]
+    },
+    {
+      "question_numbers": [
+        7
+      ],
+      "snippet_text": "Foi utilizado o template0 porque o template1, padrão para criação, utiliza UTF8 e ao tentar criar a partir dele, ocorre um erro.",
+      "web_sources": [],
+      "keywords": [
+        "template0",
+        "template1",
+        "UTF8"
+      ]
+    },
+    {
+      "question_numbers": [
+        8
+      ],
+      "snippet_text": "1.  # Permitir qualquer usuário do sistema local se conectar a qualquer banco.",
+      "web_sources": [],
+      "keywords": [
+        "#",
+        "pg_hba.conf",
+        "comentários"
+      ]
+    },
+    {
+      "question_numbers": [
+        9
+      ],
+      "snippet_text": "Para verificarmos se o usuário foi criado, vamos consultar o sistema com o comando \\du:",
+      "web_sources": [],
+      "keywords": [
+        "\\du",
+        "PSQL",
+        "usuário"
+      ]
+    },
+    {
+      "question_numbers": [
+        10
+      ],
+      "snippet_text": "SELECT— Permite consultar os dados do objeto.",
+      "web_sources": [],
+      "keywords": [
+        "SELECT",
+        "privilégios",
+        "GRANT"
+      ]
+    },
+    {
+      "question_numbers": [
+        10
+      ],
+      "snippet_text": "INSERT— Permite inserir (INSERT) novas linhas.",
+      "web_sources": [],
+      "keywords": [
+        "INSERT",
+        "privilégios"
+      ]
+    },
+    {
+      "question_numbers": [
+        10
+      ],
+      "snippet_text": "UPDATE— Permite modificar (UPDATE) os dados de qualquer coluna e de qualquer linha da tabela.",
+      "web_sources": [],
+      "keywords": [
+        "UPDATE",
+        "privilégios"
+      ]
+    },
+    {
+      "question_numbers": [
+        10
+      ],
+      "snippet_text": "DELETE— Permite eliminar (DELETE) linhas.",
+      "web_sources": [],
+      "keywords": [
+        "DELETE",
+        "privilégios"
+      ]
+    },
+    {
+      "question_numbers": [
+        10
+      ],
+      "snippet_text": "RULE— Permite criar regras para o objeto.",
+      "web_sources": [],
+      "keywords": [
+        "RULE",
+        "privilégios"
+      ]
+    },
+    {
+      "question_numbers": [
+        10
+      ],
+      "snippet_text": "REFERENCES— Permite criar chaves estrangeiras na tabela.",
+      "web_sources": [],
+      "keywords": [
+        "REFERENCES",
+        "privilégios"
+      ]
+    },
+    {
+      "question_numbers": [
+        10
+      ],
+      "snippet_text": "TRIGGER— Permite a criação de gatilhos na tabela.",
+      "web_sources": [],
+      "keywords": [
+        "TRIGGER",
+        "privilégios"
+      ]
+    }
+  ],
+  "unanswered_questions": []
+}

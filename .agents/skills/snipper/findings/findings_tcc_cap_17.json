@@ -1,0 +1,680 @@
+{
+  "findings": [
+    {
+      "question_numbers": [
+        1
+      ],
+      "snippet_text": "Crenças nucleares são nossas ideias mais centrais sobre nós mesmos, sobre os outros e sobre o mundo.",
+      "web_sources": [],
+      "keywords": [
+        "crenças nucleares",
+        "ideias mais centrais",
+        "mundo"
+      ],
+      "concepts": [
+        {
+          "name": "crenças nucleares",
+          "definition": "Ideias mais centrais e fundamentais que um indivíduo tem sobre si mesmo, sobre os outros e sobre o mundo."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        1
+      ],
+      "snippet_text": "As crenças adaptativas são realistas e funcionais e não são extremas. As crenças nucleares disfuncionais são rígidas e absolutas, mantidas pelo processamento mal-adaptativo das informações.",
+      "web_sources": [],
+      "keywords": [
+        "crenças adaptativas",
+        "crenças nucleares disfuncionais",
+        "processamento mal-adaptativo",
+        "rígidas e absolutas"
+      ],
+      "concepts": [
+        {
+          "name": "crenças adaptativas",
+          "definition": "Ideias realistas, funcionais e flexíveis mantidas preponderantemente em estados não depressivos."
+        },
+        {
+          "name": "crenças nucleares disfuncionais",
+          "definition": "Ideias rígidas, absolutas e generalizadas mantidas pelo processamento mal-adaptativo de informações nas categorias de desamparo, desamor e desvalor."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        1
+      ],
+      "snippet_text": "Beck (1964) diferencia as duas sugerindo que os esquemas são estruturas cognitivas dentro da mente. Os esquemas, no sentido piagetiano, têm várias características: permeabilidade (receptividade à mudança), magnitude (tamanho comparado ao autoconceito geral do indivíduo), carga (baixa até alta, indicando níveis de força) e conteúdo (Beck, 2019). O conteúdo dos esquemas pode ser cognitivo (expresso em crenças), motivacional, comportamental, emocional ou fisiológico.",
+      "web_sources": [],
+      "keywords": [
+        "esquemas",
+        "estruturas cognitivas",
+        "permeabilidade",
+        "magnitude",
+        "carga",
+        "conteúdo"
+      ],
+      "concepts": [
+        {
+          "name": "esquemas",
+          "definition": "Estruturas cognitivas duradouras dentro da mente que filtram e organizam informações, possuindo permeabilidade, magnitude, carga e conteúdo cognitivo, motivacional, comportamental, emocional ou fisiológico."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        1
+      ],
+      "snippet_text": "Agrupamentos de esquemas inter-relacionados e com coocorrência são denominados “modos”.",
+      "web_sources": [],
+      "keywords": [
+        "modos",
+        "esquemas",
+        "coocorrência"
+      ],
+      "concepts": [
+        {
+          "name": "modos",
+          "definition": "Agrupamentos e redes integradas de esquemas inter-relacionados que coocorrem em determinados estados psicológicos (como o modo adaptativo e o modo depressivo)."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        1
+      ],
+      "snippet_text": "Durante boa parte da vida, a maioria das pessoas mantém crenças nucleares preponderantemente realistas e equilibradas que são pelo menos consideravelmente positivas",
+      "web_sources": [],
+      "keywords": [
+        "crenças nucleares",
+        "realistas e equilibradas",
+        "positivas"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        1
+      ],
+      "snippet_text": "Quando os clientes estão em um modo adaptativo, os esquemas são mais funcionais, e suas crenças são mais realistas (ver Fig. 3.1, p. 30) e flexíveis. Suas crenças nucleares negativas tendem a estar relativamente latentes.",
+      "web_sources": [],
+      "keywords": [
+        "modo adaptativo",
+        "esquemas",
+        "crenças",
+        "realistas",
+        "flexíveis",
+        "latentes"
+      ],
+      "concepts": [
+        {
+          "name": "modo adaptativo",
+          "definition": "Estado em que predominam esquemas e crenças funcionais, realistas e flexíveis, mantendo as crenças nucleares negativas latentes."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        1
+      ],
+      "snippet_text": "Quando os clientes estão no modo depressivo, seus esquemas são disfuncionais, e suas crenças são mais distorcidas e extremas (Fig. 3.2, p. 32). Suas crenças positivas tendem a estar latentes.",
+      "web_sources": [],
+      "keywords": [
+        "modo depressivo",
+        "esquemas",
+        "crenças",
+        "distorcidas e extremas"
+      ],
+      "concepts": [
+        {
+          "name": "modo depressivo",
+          "definition": "Estado em que predominam esquemas disfuncionais e crenças distorcidas e extremas associadas a desamparo, desamor e desvalor."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        1
+      ],
+      "snippet_text": "Beck (1999) teorizou que crenças nucleares negativas sobre si mesmo recaem em duas categorias amplas: aquelas associadas ao desamparo e aquelas associadas ao desamor. Uma terceira categoria, associada ao desvalor (Fig. 3.2), também foi descrita (J.S. Beck, 2005).",
+      "web_sources": [],
+      "keywords": [
+        "crenças nucleares negativas",
+        "desamparo",
+        "desamor",
+        "desvalor"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Você começa a identificar crenças nucleares que são mais realistas e adaptativas o mais cedo possível no tratamento. Na avaliação ou na primeira sessão, você pode pedir que o cliente descreva o melhor período em sua vida. Depois pergunte como ele se via durante esse período e, se relevante, como ele via os outros e o mundo. Pergunte também como as outras pessoas o viam.",
+      "web_sources": [],
+      "keywords": [
+        "identificar crenças nucleares",
+        "adaptativas",
+        "melhor período",
+        "avaliação"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Em uma sessão futura, você pode perguntar ao cliente sobre sua visão de si mesmo antes de ficar deprimido. (A lista de qualidades positivas na p. 47 pode ajudar.) É importante atribuir a deterioração no funcionamento à sua condição, e não às suas características inatas.",
+      "web_sources": [],
+      "keywords": [
+        "visão de si mesmo",
+        "deprimido",
+        "qualidades positivas",
+        "características inatas"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Quando o cliente não consegue expressar suas crenças adaptativas prévias, você mentalmente elabora uma crença nova, mais realista e funcional e o guia em direção a ela. Essa crença deve ser equilibrada.",
+      "web_sources": [],
+      "keywords": [
+        "crenças adaptativas",
+        "crença nova",
+        "realista e funcional",
+        "equilibrada"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Várias estratégias são úteis na identificação de crenças nucleares negativas dos clientes, incluindo procurar temas centrais em seus pensamentos automáticos; usar a técnica da “seta descendente”; e observar crenças nucleares expressas como pensamentos automáticos.",
+      "web_sources": [],
+      "keywords": [
+        "identificação de crenças nucleares",
+        "temas centrais",
+        "seta descendente",
+        "pensamentos automáticos"
+      ],
+      "concepts": [
+        {
+          "name": "técnica da seta descendente",
+          "definition": "Técnica socrática em que o terapeuta questiona sucessivamente o significado de pensamentos automáticos recorrentes, assumindo hipoteticamente que sejam verdadeiros, para desvendar a crença nuclear."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Sempre que o cliente apresentar dados (problemas, pensamentos automáticos, emoções, comportamento, história), você “escuta” a categoria de crença nuclear cujo esquema parece ter sido ativado.",
+      "web_sources": [],
+      "keywords": [
+        "categoria de crença nuclear",
+        "esquema",
+        "pensamentos automáticos",
+        "escuta"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "A técnica da seta descendente ajuda a identificar crenças nucleares negativas dos clientes; ela envolve pedir que o cliente suponha que seus pensamentos automáticos (aqueles com os temas atuais) são verdadeiros e então questione sobre o significado dos seus pensamentos automáticos.",
+      "web_sources": [],
+      "keywords": [
+        "seta descendente",
+        "crenças nucleares negativas",
+        "significado",
+        "pensamentos automáticos"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Primeiro, identifique um pensamento automático decisivo cujo tema seja recorrente; então descubra o que o cliente acha que esse pensamento significa sobre ele.",
+      "web_sources": [],
+      "keywords": [
+        "pensamento automático decisivo",
+        "tema",
+        "recorrente",
+        "significa sobre ele"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Um cliente pode na verdade expressar uma crença como um pensamento automático, especialmente quando deprimido.",
+      "web_sources": [],
+      "keywords": [
+        "expressar uma crença",
+        "pensamento automático",
+        "deprimido"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Quando o cliente tem dificuldade para identificar suas crenças nucleares negativas, estas técnicas podem ajudar. Você pode levantar hipóteses sobre uma crença e pedir que ele reflita a respeito de sua validade",
+      "web_sources": [],
+      "keywords": [
+        "identificar suas crenças",
+        "hipóteses",
+        "validade"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Ou você pode apresentar a lista de crenças nucleares na página 32.",
+      "web_sources": [],
+      "keywords": [
+        "lista de crenças nucleares"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "No Capítulo 3, discutimos três categorias de crenças intermediárias: pressupostos, atitudes e regras. Há várias técnicas que você pode usar para identificá-las. Reconhecer quando crenças intermediárias são expressas como pensamentos automáticos. Identificar diretamente uma crença intermediária. Revisar um questionário de crenças.",
+      "web_sources": [],
+      "keywords": [
+        "crenças intermediárias",
+        "pressupostos",
+        "atitudes",
+        "regras",
+        "questionário de crenças"
+      ],
+      "concepts": [
+        {
+          "name": "crenças intermediárias",
+          "definition": "Ideias compostas por regras, atitudes e pressupostos que orientam estratégias de enfrentamento e conectam os pensamentos automáticos à crença nuclear."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "alguns pensamentos automáticos expressam ideias mais gerais – por exemplo: “É terrível decepcionar as pessoas”; “Devo sempre dar o melhor de mim”; “Se eu tentar fazer alguma coisa difícil, vou falhar”. Estas últimas cognições são relevantes em muitas situações e, assim, são tanto pensamentos automáticos quanto crenças intermediárias.",
+      "web_sources": [],
+      "keywords": [
+        "pensamentos automáticos",
+        "ideias mais gerais",
+        "crenças intermediárias"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Muitas crenças intermediárias contêm uma estratégia de enfrentamento disfuncional. Você pode identificar essas crenças perguntando diretamente ao cliente sobre esses padrões comportamentais. A pergunta geral foca no significado ou desfecho de usar o comportamento ou de não usar o comportamento. Ou você pode começar com uma regra ou atitude e fazer perguntas para transformá-la em um pressuposto.",
+      "web_sources": [],
+      "keywords": [
+        "estratégia de enfrentamento disfuncional",
+        "padrões comportamentais",
+        "pressuposto",
+        "regra",
+        "atitude"
+      ],
+      "concepts": [
+        {
+          "name": "estratégias de enfrentamento",
+          "definition": "Padrões comportamentais e cognitivos adotados para compensar ou tentar neutralizar crenças nucleares disfuncionais."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        2
+      ],
+      "snippet_text": "Questionários também podem ajudá-lo a identificar as crenças dos clientes (ver, p. ex., a Dysfunctional Attitude Scale [Weissman & Beck, 1978] ou o Personality Belief Questionnaire – SF [Short Form] [Beck & Beck, 1991]).",
+      "web_sources": [],
+      "keywords": [
+        "Questionários",
+        "Dysfunctional Attitude Scale",
+        "Personality Belief Questionnaire",
+        "identificar as crenças"
+      ],
+      "concepts": [
+        {
+          "name": "questionários de crenças",
+          "definition": "Instrumentos padronizados de autoavaliação (como a DAS e o PBQ) utilizados para destacar crenças e atitudes desadaptativas."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "Depois de identificada a crença intermediária ou nuclear, você precisa descobrir se vale a pena dedicar algum tempo a ela. Você em geral trabalha em crenças associadas a um problema que um cliente colocou na pauta ou com um obstáculo para atingir um objetivo.",
+      "web_sources": [],
+      "keywords": [
+        "decidir modificar",
+        "crença intermediária",
+        "crença nuclear",
+        "pauta",
+        "obstáculo",
+        "objetivo"
+      ],
+      "concepts": [
+        {
+          "name": "critérios de decisão clínica",
+          "definition": "Avaliação cuidadosa para determinar se a intervenção em uma crença é prioritária e se trará impacto significativo ao tratamento."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "Estas são algumas perguntas para fazer a si mesmo: “Qual é a crença?” “Ela provoca sofrimento emocional importante ou comportamento mal-adaptativo significativo?” “O cliente acredita nela forte e plenamente?” “Ela interfere de maneira significativa na realização dos seus objetivos e aspirações ou no engajamento em ação de valor?”",
+      "web_sources": [],
+      "keywords": [
+        "sofrimento emocional",
+        "comportamento mal-adaptativo",
+        "objetivos e aspirações",
+        "ação de valor"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "Quando o cliente endossa fortemente mais de uma crença negativa sobre um problema ou obstáculo, você em geral foca em uma que esteja associada ao maior grau de emoção negativa ou comportamento disfuncional.",
+      "web_sources": [],
+      "keywords": [
+        "emoção negativa",
+        "comportamento disfuncional",
+        "foca"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "No começo do tratamento, você trabalha em pensamentos automáticos cujo tema é indicativo de uma crença nuclear disfuncional. Você começa a trabalhar diretamente na modificação da crença nuclear negativa o mais cedo possível no tratamento.",
+      "web_sources": [],
+      "keywords": [
+        "começo do tratamento",
+        "pensamentos automáticos",
+        "modificação da crença nuclear",
+        "o mais cedo possível"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "Mas você pode precisar esperar até a metade do tratamento para fazer isso com alguns clientes, sobretudo aqueles com crenças antigas, rígidas e excessivamente generalizadas. Neste último caso, você ensinará ao cliente as técnicas de identificação, avaliação e resposta adaptativa aos pensamentos automáticos antes de usar as mesmas ferramentas para crenças disfuncionais.",
+      "web_sources": [],
+      "keywords": [
+        "metade do tratamento",
+        "crenças antigas rígidas",
+        "pensamentos automáticos"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        3
+      ],
+      "snippet_text": "Depois de identificada uma crença disfuncional importante, você pode fazer estas perguntas a si mesmo para descobrir se trabalha ou não na crença naquele momento:",
+      "web_sources": [],
+      "keywords": [
+        "trabalha ou não na crença",
+        "naquele momento",
+        "identificada uma crença disfuncional"
+      ],
+      "concepts": [
+        {
+          "name": "prontidão para modificação de crenças",
+          "definition": "Conjunto de pré-condições clínicas necessárias (objetividade, tolerância ao afeto, vínculo e tempo de sessão) para abordar a crença."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "As crenças, assim como os pensamentos automáticos, são ideias, não necessariamente verdades, e podem ser testadas e mudadas. As crenças são aprendidas, não inatas, e podem ser revisadas. Há uma gama de crenças que o cliente pode adotar. As crenças podem ser bastante rígidas e “parecer” verdadeiras – mas são sempre ou quase sempre infundadas. As crenças se originaram por meio do significado que o cliente atribuiu a suas experiências quando jovem e/ou em idade mais avançada. Quando esquemas relevantes são ativados, o cliente prontamente reconhece dados que parecem apoiar suas crenças nucleares, ao mesmo tempo ignorando dados contrários ou nem mesmo processando os dados como relevantes para a crença.",
+      "web_sources": [],
+      "keywords": [
+        "ideias não verdades",
+        "aprendidas não inatas",
+        "esquemas ativados",
+        "ignorando dados contrários"
+      ],
+      "concepts": [
+        {
+          "name": "psicoeducação sobre crenças",
+          "definition": "Esclarecimento de que crenças são hipóteses e ideias aprendidas na infância e ao longo da vida, e não verdades imutáveis sobre si mesmo."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Quando orientei Abe a respeito de sua crença nuclear, sugeri duas possibilidades sobre o problema.",
+      "web_sources": [],
+      "keywords": [
+        "orientei",
+        "crença nuclear",
+        "duas possibilidades"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Ou o problema é que você realmente é incompetente e, caso seja, trabalharemos juntos para que se torne mais competente... ou talvez esse não seja o problema. Talvez o problema seja que você tem uma crença de que é incompetente, quando na verdade não é. E algumas vezes a crença é tão forte que o impede de até mesmo descobrir se você conseguiria fazer alguma coisa bem.",
+      "web_sources": [],
+      "keywords": [
+        "duas possibilidades",
+        "crença de que é incompetente",
+        "competência"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Posteriormente explico crenças nucleares a Abe, em pequenas partes, assegurando que ele entenda enquanto prossigo. Uso a metáfora de uma tela.",
+      "web_sources": [],
+      "keywords": [
+        "metáfora de uma tela",
+        "crenças nucleares",
+        "pequenas partes"
+      ],
+      "concepts": [
+        {
+          "name": "metáfora da tela",
+          "definition": "Metáfora clínica que compara a mente a uma tela ao redor da cabeça que deixa passar apenas dados condizentes com a crença negativa e bloqueia dados positivos."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Antes de tudo, uma crença nuclear negativa é uma ideia em que você pode não acreditar fortemente quando não está deprimido. Por outro lado, esperaríamos que acreditasse nela quase completamente quando está deprimido, mesmo que haja evidências de que não é verdadeira.",
+      "web_sources": [],
+      "keywords": [
+        "crença nuclear negativa",
+        "deprimido",
+        "evidências"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Quando você fica deprimido, essa ideia se torna muito forte. (fazendo movimentos com as mãos) É como se houvesse uma tela em torno da sua cabeça. A ideia de que você é incompetente está escrita nela um bilhão de vezes. Tudo o que se encaixa com a ideia de que você é incompetente passa direto da tela para a sua mente. Mas qualquer informação que a contradiz não se encaixa. Então você nem mesmo nota a informação positiva, ou a ignora de alguma forma.",
+      "web_sources": [],
+      "keywords": [
+        "tela em torno da sua cabeça",
+        "informação positiva",
+        "ignora",
+        "contradiz"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "A seguir, pergunto a Abe sobre experiências anteriores em que ele se recordava de ter essa crença.",
+      "web_sources": [],
+      "keywords": [
+        "experiências anteriores",
+        "origem da crença"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "“Sou incompetente” parece ser uma crença nuclear que começou quando você era criança. Mas você não acreditava nela o tempo todo. Imagino que na maior parte da sua vida, até a depressão se instalar, você se achava razoavelmente competente. Mas agora a tela está operando.",
+      "web_sources": [],
+      "keywords": [
+        "quando você era criança",
+        "crença nuclear",
+        "tela está operando"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        4
+      ],
+      "snippet_text": "Em seguida, desenhei à mão o diagrama na Figura 17.2 para resumir o que havíamos discutido na sessão.",
+      "web_sources": [],
+      "keywords": [
+        "diagrama",
+        "resumir o que havíamos discutido"
+      ],
+      "concepts": [
+        {
+          "name": "diagrama de conceitualização de crenças",
+          "definition": "Ferramenta visual que resume de forma colaborativa a gênese infantil da crença e seu impacto nas reações e pensamentos atuais."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        5
+      ],
+      "snippet_text": "O fato de sugerir que uma crença disfuncional pode não ser verdadeira, ou não completamente verdadeira, pode provocar ansiedade em alguns clientes. Se for assim, você pode desenhar um quadro (ver p. 325) e pedir que o cliente identifique as vantagens e desvantagens de manter sua crença nuclear disfuncional e as vantagens e desvantagens de acreditar na crença mais adaptativa. Pergunte o que ele conclui dessa análise.",
+      "web_sources": [],
+      "keywords": [
+        "vantagens e desvantagens",
+        "crença nuclear disfuncional",
+        "crença mais adaptativa",
+        "motivar"
+      ],
+      "concepts": [
+        {
+          "name": "análise de vantagens e desvantagens",
+          "definition": "Técnica de comparação racional e motivacional sobre os custos e benefícios de manter a crença disfuncional versus adotar uma crença adaptativa."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        5
+      ],
+      "snippet_text": "Quando o cliente precisa de motivação adicional, você pode pedir que ele visualize um dia em sua vida vários anos atrás, primeiro mantendo sua crença nuclear negativa como ela é, e depois acreditando na sua nova crença nuclear por um tempo bem longo.",
+      "web_sources": [],
+      "keywords": [
+        "motivação adicional",
+        "visualize",
+        "crença nuclear negativa",
+        "nova crença nuclear"
+      ],
+      "concepts": [
+        {
+          "name": "visualização de cenários futuros",
+          "definition": "Técnica vivencial em que o paciente projeta seu futuro sob a perspectiva da crença negativa versus a crença adaptativa para despertar motivação de mudança."
+        }
+      ]
+    },
+    {
+      "question_numbers": [
+        5
+      ],
+      "snippet_text": "“Eu gostaria que você imaginasse um dia na sua vida daqui a __________ anos; então este é o ano __________. Você não mudou sua crença nuclear de que é __________. Então você acreditou nisso dia após dia por mais __________ anos. Isso foi ficando cada vez mais forte a cada dia que passava, e a cada semana, a cada mês e a cada ano.",
+      "web_sources": [],
+      "keywords": [
+        "imaginasse um dia na sua vida",
+        "não mudou sua crença nuclear",
+        "cada dia mais forte"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        5
+      ],
+      "snippet_text": "“Gostaria que você imaginasse como sua crença afetou várias partes da sua vida. Lembre-se, sua crença nuclear é muito mais forte do que é hoje. Tente visualizar cada parte da sua vida enquanto lhe pergunto a respeito. E reflita sobre o quanto de prazer ou satisfação provavelmente estará experimentando...",
+      "web_sources": [],
+      "keywords": [
+        "afetou várias partes da sua vida",
+        "visualizar",
+        "prazer ou satisfação"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        5
+      ],
+      "snippet_text": "Então você pode perguntar sobre outras áreas relevantes – por exemplo: relacionamentos específicos, emprego, como ele passa seu tempo de lazer, espiritualidade, criatividade, saúde física e administração da casa. Certifique-se de descobrir o quanto de prazer ou satisfação ele obtém de cada uma. Por fim, pergunte: “Como é seu humor de um modo geral? O que conclui do fato de ter acreditado que você é ___________ por tanto tempo?”",
+      "web_sources": [],
+      "keywords": [
+        "áreas relevantes",
+        "prazer ou satisfação",
+        "humor de um modo geral",
+        "conclui"
+      ],
+      "concepts": []
+    },
+    {
+      "question_numbers": [
+        5
+      ],
+      "snippet_text": "Agora repita as mesmas perguntas para um segundo cenário, mas comece dizendo: “Agora eu gostaria que você imaginasse que acredita na sua nova crença nuclear, de que você é ________. Você acredita nela cada vez mais fortemente dia após dia, semana após semana, mês após mês e ano após ano durante anos.",
+      "web_sources": [],
+      "keywords": [
+        "segundo cenário",
+        "nova crença nuclear",
+        "acredita nela cada vez mais fortemente"
+      ],
+      "concepts": []
+    }
+  ],
+  "unanswered_questions": []
+}
