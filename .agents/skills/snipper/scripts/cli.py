@@ -4,6 +4,7 @@
 # dependencies = [
 #     "python-docx>=1.1.0",
 #     "spacy>=3.7.0",
+#     "PyYAML>=6.0.0",
 # ]
 # ///
 """Command line interface for Snipper."""
@@ -19,7 +20,7 @@ if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
 from config import SnipperConfig, resolve_constraints_path
-from document import DocumentParser
+from document import DocumentParser, export_to_txt
 from findings import FindingsData
 from highlighter import DocumentHighlighter
 from mutation import DocumentMutator
@@ -95,6 +96,14 @@ def run_pipeline(
         return 1
 
     print(f"[+] Loaded {len(parsed.questions)} question(s) and {len(parsed.body_paragraphs)} body paragraph(s).")
+
+    # Auto-synchronize lightweight text copy
+    if not dry_run:
+        try:
+            txt_path = export_to_txt(parsed)
+            print(f"[+] Synchronized text copy to: {txt_path}")
+        except Exception as e:
+            print(f"[*] Warning: Could not export text copy: {e}", file=sys.stderr)
 
     # 3. Deterministic NLP Lexical Matching (Phase 1 - Highlighter)
     matcher = LexicalMatcher(config)
@@ -227,6 +236,11 @@ def main(argv=None):
     run_parser.add_argument("--output", type=str, default=None, help="Optional output path (defaults to in-place overwrite)")
     run_parser.add_argument("--dry-run", action="store_true", help="Simulate execution without modifying files or saving")
 
+    # 'dump' subcommand (Lightweight plain-text export)
+    dump_parser = subparsers.add_parser("dump", help="Export plain-text copy of document with paragraph coordinates")
+    dump_parser.add_argument("document", type=str, help="Path to input .docx document")
+    dump_parser.add_argument("--output", type=str, default=None, help="Optional output path (defaults to <name>.snipper.txt)")
+
     args = parser.parse_args(argv)
 
     if not args.command:
@@ -238,8 +252,21 @@ def main(argv=None):
         print(f"[!] Error: File '{doc_path}' not found.", file=sys.stderr)
         return 1
 
-    cfg_path = Path(args.config) if args.config else None
     out_path = Path(args.output) if args.output else None
+
+    # Handle 'dump' subcommand directly
+    if args.command == "dump":
+        doc_parser = DocumentParser()
+        try:
+            parsed = doc_parser.parse(doc_path)
+            out_file = export_to_txt(parsed, output_path=out_path)
+            print(f"[OK] Exported plain text copy to: {out_file}")
+            return 0
+        except Exception as e:
+            print(f"[!] Error exporting text copy: {e}", file=sys.stderr)
+            return 1
+
+    cfg_path = Path(args.config) if args.config else None
     raw_findings = getattr(args, "findings", None)
     findings_path = resolve_findings_path(raw_findings, doc_path)
     if findings_path and not raw_findings:

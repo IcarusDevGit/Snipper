@@ -29,6 +29,10 @@ Execute semantic answer snippet discovery, concept resolution, keyword determina
    - Parse questions and any sub-bullet metadata:
      - `- Keywords: <comma-separated terms>`
      - `- Concepts: <concept name> [(web: true)]`
+   - Generate/sync the lightweight text companion `<filename>.snipper.txt` via:
+     ```bash
+     python .agents/skills/snipper/scripts/cli.py dump "<path/to/document.docx>"
+     ```
 
 ### 2. Stage 1: Concept Resolution & Interactive Source Selection
 1. For each concept associated with a question:
@@ -45,10 +49,10 @@ Execute semantic answer snippet discovery, concept resolution, keyword determina
      - Record the approved `source_url` and final `definition`.
 
 ### 3. Stage 2: Answers & Exhaustive Multi-Snippet Gathering
-1. Read the **entire** body text from beginning to end (100% full-text scan).
+1. Read the lightweight `<filename>.snipper.txt` companion file via `view_file` (100% full-text scan).
 2. For each question, extract **all** verbatim sentences or paragraphs containing factual evidence.
 3. **Mandatory Invariant**: Do NOT stop after a single sentence or clause. Comprehensive multi-snippet coverage is required across the full document text (`C-EXE-04`).
-4. Text in `snippet_text` must match the source document character-for-character (`C-TXT-02`).
+4. **Paragraph Markers (`[P#]`)**: Do NOT copy `[P#]` markers into `snippet_text`. Text in `snippet_text` must match the source document character-for-character (`C-TXT-02`).
 
 ### 4. Stage 3: Keywords Determination
 1. For each question:
@@ -59,9 +63,7 @@ Execute semantic answer snippet discovery, concept resolution, keyword determina
 ### 5. Stage 4: Highlighter & Document Mutation
 1. Execute the document mutation:
    ```bash
-   snipper run "<path/to/document.docx>" --findings "<path/to/findings.json>"
-   # or via bundled script:
-   python scripts/cli.py run "<path/to/document.docx>" --findings "<path/to/findings.json>"
+   python .agents/skills/snipper/scripts/cli.py run "<path/to/document.docx>" --findings "<path/to/findings.json>"
    ```
 2. Verify the document was mutated in-place and backup conserved:
    - Backup copy `<filename>.backup.docx` exists and is intact (`C-DOC-04`).

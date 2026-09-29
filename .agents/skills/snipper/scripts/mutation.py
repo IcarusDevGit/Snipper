@@ -126,7 +126,50 @@ def insert_summary_block(
             kw_p = body_header_p.insert_paragraph_before()
             kw_p.add_run(f"  * Keywords: {', '.join(q_keywords)}")
 
+        # Collect and merge concepts for this question
+        concept_dict: Dict[str, Dict[str, Optional[str]]] = {}
+        concept_order: List[str] = []
 
+        for c in getattr(q, "concepts", []):
+            key = c.name.lower().strip()
+            if key not in concept_dict:
+                concept_order.append(key)
+                concept_dict[key] = {
+                    "name": c.name,
+                    "definition": c.definition,
+                    "source_url": c.source_url,
+                }
+
+        for f in q_findings:
+            for fc in getattr(f, "concepts", []):
+                key = fc.name.lower().strip()
+                if key not in concept_dict:
+                    concept_order.append(key)
+                    concept_dict[key] = {
+                        "name": fc.name,
+                        "definition": fc.definition,
+                        "source_url": fc.source_url,
+                    }
+                else:
+                    if fc.definition:
+                        concept_dict[key]["definition"] = fc.definition
+                    if fc.source_url:
+                        concept_dict[key]["source_url"] = fc.source_url
+
+        for key in concept_order:
+            c_info = concept_dict[key]
+            c_name = c_info["name"]
+            c_def = (c_info["definition"] or "").strip()
+            c_url = (c_info["source_url"] or "").strip()
+
+            c_p = body_header_p.insert_paragraph_before()
+            if c_def:
+                text = f"  * Concept: {c_name} - {c_def}"
+            else:
+                text = f"  * Concept: {c_name}"
+            if c_url:
+                text += f" (Source: {c_url})"
+            c_p.add_run(text)
         if is_unanswered:
             unanswered_p = body_header_p.insert_paragraph_before()
             unans_run = unanswered_p.add_run("  * Snippet: [No answering evidence found in text]")

@@ -5,9 +5,8 @@ from pathlib import Path
 import random
 import re
 import sys
-from typing import Any, List, Optional, Tuple
+from typing import List, Optional, Tuple
 import docx
-from docx.document import Document as DocxDocument
 from docx.text.paragraph import Paragraph
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
@@ -31,6 +30,20 @@ KEYWORDS_REGEX = re.compile(
     r"^\s*[-*•]\s*(?:keywords?|palavras-chave)\s*:\s*(.+)$",
     re.IGNORECASE,
 )
+CONCEPTS_REGEX = re.compile(
+    r"^\s*[-*•]\s*(?:concepts?|conceitos?)\s*:\s*(.+)$",
+    re.IGNORECASE,
+)
+
+
+@dataclass
+class Concept:
+    name: str
+    web_search: bool = False
+    definition: Optional[str] = None
+    source_url: Optional[str] = None
+
+
 @dataclass
 class Question:
     id: int
@@ -38,11 +51,12 @@ class Question:
     paragraph_idx: int
     color: str
     keywords: List[str] = field(default_factory=list)
+    concepts: List[Concept] = field(default_factory=list)
 
 
 @dataclass
 class ParsedDocument:
-    doc: DocxDocument
+    doc: docx.Document
     file_path: Path
     questions_header_idx: int
     body_header_idx: int
@@ -52,6 +66,13 @@ class ParsedDocument:
     @property
     def body_text(self) -> str:
         return "\n".join(p.text for _, p in self.body_paragraphs)
+
+    @property
+    def annotated_text(self) -> str:
+        return format_as_txt(self)
+
+    def export_txt(self, output_path: Optional[Path | str] = None) -> Path:
+        return export_to_txt(self, output_path)
 
 
 class DocumentParser:
@@ -65,7 +86,7 @@ class DocumentParser:
         if not path.exists():
             raise FileNotFoundError(f"Input document not found: {path}")
 
-        doc = docx.Document(str(path))
+        doc = docx.Document(path)
         paragraphs = doc.paragraphs
 
         questions_idx: Optional[int] = None
@@ -91,7 +112,7 @@ class DocumentParser:
         if body_idx <= questions_idx:
             raise ValueError("'Body' section must appear after 'Questions' section.")
 
-        # Extract Questions with optional Keywords sub-bullets
+        # Extract Questions with optional Keywords and Concepts sub-bullets
         raw_questions: List[dict] = []
         for idx in range(questions_idx + 1, body_idx):
             raw_text = paragraphs[idx].text.strip()
@@ -110,6 +131,17 @@ class DocumentParser:
                 raw_questions[-1]["keywords"].extend(items)
                 continue
 
+            # Check for Concepts sub-bullet
+            concept_match = CONCEPTS_REGEX.match(raw_text)
+            if concept_match and raw_questions:
+                concept_content = concept_match.group(1).strip()
+                items = [c.strip() for c in re.split(r"[,;]", concept_content) if c.strip()]
+                for item in items:
+                    web_search = bool(re.search(r"[\(\[]\s*web(?:\s*:\s*true)?\s*[\)\]]", item, re.IGNORECASE))
+                    clean_name = re.sub(r"[\(\[]\s*web(?:\s*:\s*true)?\s*[\)\]]", "", item, flags=re.IGNORECASE).strip()
+                    raw_questions[-1]["concepts"].append(Concept(name=clean_name, web_search=web_search))
+                continue
+
             # Strip leading list markers like "1.", "1 -", "-", "*"
             cleaned = re.sub(r"^(?:\d+[\.\-\)]\s*|[\*\-\•]\s*)", "", raw_text).strip()
             if cleaned:
@@ -117,6 +149,7 @@ class DocumentParser:
                     "p_idx": idx,
                     "text": cleaned,
                     "keywords": [],
+                    "concepts": [],
                 })
 
         # Assign colors
@@ -137,6 +170,7 @@ class DocumentParser:
                     paragraph_idx=q_data["p_idx"],
                     color=color,
                     keywords=q_data["keywords"],
+                    concepts=q_data["concepts"],
                 )
             )
 
@@ -153,3 +187,37 @@ class DocumentParser:
             questions=questions,
             body_paragraphs=body_paragraphs,
         )
+
+
+def format_as_txt(parsed: ParsedDocument) -> str:
+    """Formats a ParsedDocument into zero-clutter plain text with paragraph tags."""
+    lines: List[str] = ["=== QUESTIONS ==="]
+    for q in parsed.questions:
+        lines.append(f"{q.id}. {q.text}")
+        if q.keywords:
+            lines.append(f"   - Keywords: {', '.join(q.keywords)}")
+        if q.concepts:
+            c_strs = [
+                f"{c.name} (web: true)" if c.web_search else c.name
+                for c in q.concepts
+            ]
+            lines.append(f"   - Concepts: {', '.join(c_strs)}")
+
+    lines.append("")
+    lines.append("=== BODY ===")
+    for i, (_, p_obj) in enumerate(parsed.body_paragraphs):
+        lines.append(f"[P{i}] {p_obj.text}")
+
+    return "\n".join(lines) + "\n"
+
+
+def export_to_txt(parsed: ParsedDocument, output_path: Optional[Path | str] = None) -> Path:
+    """Exports the parsed document as a lightweight .snipper.txt companion file."""
+    if output_path:
+        out = Path(output_path)
+    else:
+        out = parsed.file_path.with_name(f"{parsed.file_path.stem}.snipper.txt")
+
+    content = format_as_txt(parsed)
+    out.write_text(content, encoding="utf-8")
+    return out

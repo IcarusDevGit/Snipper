@@ -38,11 +38,19 @@ def format_superscript_citations(question_ids: List[int]) -> str:
 
 
 @dataclass
+class FindingConcept:
+    name: str
+    definition: str
+    source_url: Optional[str] = None
+
+
+@dataclass
 class Finding:
     question_numbers: List[int]
     snippet_text: str
     web_sources: List[str] = field(default_factory=list)
     keywords: List[str] = field(default_factory=list)
+    concepts: List[FindingConcept] = field(default_factory=list)
 
 
 @dataclass
@@ -68,11 +76,24 @@ class FindingsData:
             snippet = item.get("snippet_text", "")
             sources = item.get("web_sources", [])
             keywords = item.get("keywords", [])
+            raw_concepts = item.get("concepts", [])
 
             if not isinstance(q_nums, list) or not q_nums:
                 raise ValueError(f"Finding at index {idx} must have non-empty 'question_numbers' list.")
             if not isinstance(snippet, str) or not snippet.strip():
                 raise ValueError(f"Finding at index {idx} must have non-empty 'snippet_text'.")
+
+            parsed_concepts: List[FindingConcept] = []
+            if isinstance(raw_concepts, list):
+                for c in raw_concepts:
+                    if isinstance(c, dict) and "name" in c and "definition" in c:
+                        parsed_concepts.append(
+                            FindingConcept(
+                                name=str(c["name"]).strip(),
+                                definition=str(c["definition"]).strip(),
+                                source_url=str(c["source_url"]).strip() if c.get("source_url") else None,
+                            )
+                        )
 
             findings.append(
                 Finding(
@@ -80,6 +101,7 @@ class FindingsData:
                     snippet_text=snippet,
                     web_sources=[str(s) for s in sources] if isinstance(sources, list) else [],
                     keywords=[str(k).strip() for k in keywords] if isinstance(keywords, list) else [],
+                    concepts=parsed_concepts,
                 )
             )
 

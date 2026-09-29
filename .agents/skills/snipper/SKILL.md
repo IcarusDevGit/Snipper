@@ -67,24 +67,26 @@ This skill guides an AI agent through the **4-stage Snipper pipeline**:
 
 ## 1. CLI Commands & Execution Modes
 
-The application CLI supports two primary execution modes (callable either via installed `snipper` CLI or directly through the bundled `python scripts/cli.py`):
+The application CLI is executed directly through the self-contained script `python .agents/skills/snipper/scripts/cli.py` (or `python scripts/cli.py` within the skill folder):
 
 ```bash
 # Mode A: Full Pipeline (Deterministic Lexical Match + Agent Semantic Discovery + In-Place Mutation)
-snipper run <path/to/document.docx>
+python .agents/skills/snipper/scripts/cli.py run <path/to/document.docx>
 # or specifying a pre-generated findings file:
-snipper run <path/to/document.docx> --findings findings/<filename>.json
+python .agents/skills/snipper/scripts/cli.py run <path/to/document.docx> --findings findings/<filename>.json
 # or previewing without modifying the document:
-snipper run <path/to/document.docx> --findings findings/<filename>.json --dry-run
-# or via bundled script:
-python scripts/cli.py run <path/to/document.docx> --findings findings/<filename>.json
+python .agents/skills/snipper/scripts/cli.py run <path/to/document.docx> --findings findings/<filename>.json --dry-run
 
 # Mode B: Standalone Highlighter (Deterministic Phase 1 ONLY - Zero Agent Invocations)
-snipper highlight <path/to/document.docx>
+python .agents/skills/snipper/scripts/cli.py highlight <path/to/document.docx>
 # or with dry-run preview:
-snipper highlight <path/to/document.docx> --dry-run
-# or via bundled script:
-python scripts/cli.py highlight <path/to/document.docx>
+python .agents/skills/snipper/scripts/cli.py highlight <path/to/document.docx> --dry-run
+
+# Mode C: Plain-Text Export (Zero-Clutter Spatial Coordinate File)
+python .agents/skills/snipper/scripts/cli.py dump <path/to/document.docx>
+
+# Verification: Self-Contained Test Suite (30 unit tests)
+python -m pytest .agents/skills/snipper/scripts
 ```
 
 ---
@@ -119,17 +121,22 @@ All agent actions and programmatic implementations MUST adhere to these strict c
 
 ## 3. Detailed Operational Specifications
 
-### 3.1 Stage 1: Document Ingestion & Sub-Bullet Parsing
+### 3.1 Stage 1: Document Ingestion, Sub-Bullet Parsing & Text Companion
 1. **Document Loading**: Open target `.docx` using `python-docx`. The active document object MUST be retained for in-place mutation.
-2. **Section Boundary & Sub-Bullet Parsing**:
+2. **Text Companion Generation**: Generate or synchronize the lightweight companion text file `<filename>.snipper.txt` (via `python .agents/skills/snipper/scripts/cli.py dump <filename>.docx` or `export_to_txt`).
+3. **Section Boundary & Sub-Bullet Parsing**:
    * Locate `Questions` header: Search paragraph text matching `^\s*questions?\s*:?\s*$` (case-insensitive regex).
    * Locate `Body` header: Search paragraph text matching `^\s*body\s*:?\s*$` (case-insensitive regex).
    * Extract target questions and inspect subsequent sub-bullet paragraphs until the next question or `Body`:
      * `- Keywords:` / `- Palavras-chave:` -> extract comma/semicolon-separated keywords into `q.keywords`.
 
 ### 3.2 Stage 2: Answers & Exhaustive Snippets (Agent Protocol)
-1. **Input Payload**: Agent receives `QUESTIONS` (with sub-bullets) and the raw text of `BODY`.
-2. **Exhaustive Multi-Snippet Gathering**:
+1. **Input Payload**: Agent reads the lightweight `<filename>.snipper.txt` companion file via `view_file` to review `QUESTIONS` and `BODY`.
+2. **Spatial Paragraph Coordinates (`[P#]`)**:
+   * Each body paragraph in `<filename>.snipper.txt` begins with a tag like `[P0]`, `[P1]`.
+   * These tags serve as spatial coordinates for paragraph location.
+   * **STRICT INVARIANT**: The agent MUST NOT copy the `[P#]` prefix into `snippet_text`.
+3. **Exhaustive Multi-Snippet Gathering**:
    * Read the entire `BODY` from beginning to end without stopping early (100% full-text pass).
    * For each question, collect ALL relevant sentences or paragraphs providing factual answering context.
    * **STRICT INVARIANT (`C-EXE-04`)**: Do NOT stop after locating a single sentence or minimal clause. Comprehensiveness across the entire text is mandatory.
