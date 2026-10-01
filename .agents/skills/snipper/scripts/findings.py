@@ -3,8 +3,9 @@
 from dataclasses import dataclass, field
 import json
 from pathlib import Path
+import re
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
@@ -29,12 +30,28 @@ def to_superscript_num(num: int) -> str:
     return "".join(SUPERSCRIPT_DIGITS.get(d, d) for d in str(num))
 
 
-def format_superscript_citations(question_ids: List[int]) -> str:
-    """Formats a list of question IDs as a superscript citation string (e.g. [1, 2] -> '¹,²')."""
-    if not question_ids:
+def to_superscript_str(val: Any) -> str:
+    """Converts digits in an identifier to Unicode superscript characters."""
+    s = str(val)
+    return "".join(SUPERSCRIPT_DIGITS.get(d, d) for d in s)
+
+
+def format_superscript_citations(target_ids: List[Any]) -> str:
+    """Formats a list of question/target IDs as a superscript citation string (e.g. [1, 2] -> '¹,²', ['Q1', 'O1'] -> 'O¹,Q¹')."""
+    if not target_ids:
         return ""
-    sorted_ids = sorted(set(question_ids))
-    return ",".join(to_superscript_num(qid) for qid in sorted_ids)
+
+    def sort_key(x: Any):
+        s = str(x).strip()
+        m = re.match(r"^([A-Za-z]+)(\d+)$", s)
+        if m:
+            return (m.group(1).upper(), int(m.group(2)))
+        if s.isdigit():
+            return ("Q", int(s))
+        return ("Z", s)
+
+    sorted_ids = sorted(set(target_ids), key=sort_key)
+    return ",".join(to_superscript_str(tid) for tid in sorted_ids)
 
 
 @dataclass
@@ -48,6 +65,7 @@ class FindingConcept:
 class Finding:
     question_numbers: List[int]
     snippet_text: str
+    target_ids: List[str] = field(default_factory=list)
     web_sources: List[str] = field(default_factory=list)
     keywords: List[str] = field(default_factory=list)
     concepts: List[FindingConcept] = field(default_factory=list)
@@ -57,6 +75,7 @@ class Finding:
 class FindingsData:
     findings: List[Finding] = field(default_factory=list)
     unanswered_questions: List[int] = field(default_factory=list)
+    unanswered_targets: List[str] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "FindingsData":
@@ -72,16 +91,41 @@ class FindingsData:
             if not isinstance(item, dict):
                 raise ValueError(f"Finding at index {idx} must be a dictionary.")
 
-            q_nums = item.get("question_numbers", [])
+            raw_target_ids = item.get("target_ids")
+            raw_q_nums = item.get("question_numbers")
             snippet = item.get("snippet_text", "")
             sources = item.get("web_sources", [])
             keywords = item.get("keywords", [])
             raw_concepts = item.get("concepts", [])
 
-            if not isinstance(q_nums, list) or not q_nums:
-                raise ValueError(f"Finding at index {idx} must have non-empty 'question_numbers' list.")
-            if not isinstance(snippet, str) or not snippet.strip():
+            if not snippet or not isinstance(snippet, str) or not snippet.strip():
                 raise ValueError(f"Finding at index {idx} must have non-empty 'snippet_text'.")
+
+            target_ids: List[str] = []
+            question_numbers: List[int] = []
+
+            if raw_target_ids is not None and isinstance(raw_target_ids, list):
+                target_ids = [str(t).strip() for t in raw_target_ids if str(t).strip()]
+            if raw_q_nums is not None and isinstance(raw_q_nums, list):
+                for q in raw_q_nums:
+                    try:
+                        question_numbers.append(int(q))
+                    except (ValueError, TypeError):
+                        pass
+
+            if not target_ids and not question_numbers:
+                raise ValueError(
+                    f"Finding at index {idx} must have non-empty 'target_ids' or 'question_numbers' list."
+                )
+
+            # Cross-populate missing representations
+            if not target_ids and question_numbers:
+                target_ids = [f"Q{q}" for q in question_numbers]
+            elif not question_numbers and target_ids:
+                for tid in target_ids:
+                    m = re.search(r"\d+", tid)
+                    if m:
+                        question_numbers.append(int(m.group()))
 
             parsed_concepts: List[FindingConcept] = []
             if isinstance(raw_concepts, list):
@@ -97,7 +141,8 @@ class FindingsData:
 
             findings.append(
                 Finding(
-                    question_numbers=[int(q) for q in q_nums],
+                    question_numbers=question_numbers,
+                    target_ids=target_ids,
                     snippet_text=snippet,
                     web_sources=[str(s) for s in sources] if isinstance(sources, list) else [],
                     keywords=[str(k).strip() for k in keywords] if isinstance(keywords, list) else [],
@@ -105,12 +150,33 @@ class FindingsData:
                 )
             )
 
-        unanswered = data.get("unanswered_questions", [])
-        unanswered_list = [int(q) for q in unanswered] if isinstance(unanswered, list) else []
+        unanswered_raw = data.get("unanswered_targets")
+        unanswered_q_raw = data.get("unanswered_questions")
+
+        unanswered_targets: List[str] = []
+        unanswered_questions: List[int] = []
+
+        if unanswered_raw is not None and isinstance(unanswered_raw, list):
+            unanswered_targets = [str(t).strip() for t in unanswered_raw if str(t).strip()]
+        if unanswered_q_raw is not None and isinstance(unanswered_q_raw, list):
+            for q in unanswered_q_raw:
+                try:
+                    unanswered_questions.append(int(q))
+                except (ValueError, TypeError):
+                    pass
+
+        if not unanswered_targets and unanswered_questions:
+            unanswered_targets = [f"Q{q}" for q in unanswered_questions]
+        elif not unanswered_questions and unanswered_targets:
+            for ut in unanswered_targets:
+                m = re.search(r"\d+", ut)
+                if m:
+                    unanswered_questions.append(int(m.group()))
 
         return cls(
             findings=findings,
-            unanswered_questions=unanswered_list,
+            unanswered_questions=unanswered_questions,
+            unanswered_targets=unanswered_targets,
         )
 
     @classmethod

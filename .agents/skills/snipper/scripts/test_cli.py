@@ -230,6 +230,88 @@ def test_cli_auto_sync_txt(tmp_path: Path):
     assert "[P0] Jane Smith leads the development team." in txt_content
 
 
+def test_cli_snip_subcommand(tmp_path: Path):
+    doc_path = tmp_path / "snip_test.docx"
+    q_path = tmp_path / "snip_test.questions.txt"
+
+    q_path.write_text("Q1: What is the SLA?\nO1: Audit logs.\n", encoding="utf-8")
+
+    doc = docx.Document()
+    doc.add_paragraph("Clean document body without question headers.")
+    doc.save(doc_path)
+
+    ret = main(["snip", str(doc_path)])
+    assert ret == 0
+
+    txt_file = tmp_path / "snip_test.txt"
+    assert txt_file.exists()
+    assert "[P0] Clean document body without question headers." in txt_file.read_text(encoding="utf-8")
+
+
+def test_cli_hlt_subcommand(tmp_path: Path):
+    doc_path = tmp_path / "hlt_test.docx"
+    q_path = tmp_path / "hlt_test.questions.txt"
+    f_path = tmp_path / "hlt_test.findings.json"
+
+    q_path.write_text("Q1: What is the failover mechanism?\n", encoding="utf-8")
+    f_path.write_text(
+        """{
+            "findings": [
+                {
+                    "target_ids": ["Q1"],
+                    "snippet_text": "The failover mechanism is active-passive.",
+                    "keywords": ["failover"]
+                }
+            ],
+            "unanswered_targets": []
+        }""",
+        encoding="utf-8",
+    )
+
+    doc = docx.Document()
+    doc.add_paragraph("The failover mechanism is active-passive across clusters.")
+    doc.save(doc_path)
+
+    # hlt with auto-detected findings
+    ret = main(["hlt", str(doc_path)])
+    assert ret == 0
+
+    mutated = docx.Document(doc_path)
+    paras = [p.text for p in mutated.paragraphs]
+    assert any("=== SNIPPER SUMMARY START ===" in p for p in paras)
+    assert any("=== SNIPPER SUMMARY END ===" in p for p in paras)
+    assert any("Q1: What is the failover mechanism?" in p for p in paras)
+
+
+def test_cli_lookup_subcommand(tmp_path: Path, capsys):
+    doc_path = tmp_path / "lookup_sample.docx"
+    f_path = tmp_path / "lookup_sample.findings.json"
+
+    f_path.write_text(
+        """{
+            "findings": [
+                {
+                    "target_ids": ["O1"],
+                    "snippet_text": "TLS 1.3 is enforced on all endpoints.",
+                    "keywords": ["TLS", "endpoints"]
+                }
+            ],
+            "unanswered_targets": []
+        }""",
+        encoding="utf-8",
+    )
+
+    doc = docx.Document()
+    doc.add_paragraph("TLS 1.3 is enforced on all endpoints.")
+    doc.save(doc_path)
+
+    ret = main(["lookup", "--q", "TLS endpoints", "--dir", str(tmp_path)])
+    assert ret == 0
+    captured = capsys.readouterr()
+    assert "[Found 1 relevant snippets" in captured.out
+    assert "TLS 1.3 is enforced on all endpoints." in captured.out
+
+
 if __name__ == "__main__":
     with tempfile.TemporaryDirectory() as td:
         tpath = Path(td)
@@ -240,4 +322,6 @@ if __name__ == "__main__":
         test_cli_full_pipeline_with_concepts_and_keywords(tpath)
         test_cli_dump_subcommand(tpath)
         test_cli_auto_sync_txt(tpath)
+        test_cli_snip_subcommand(tpath)
+        test_cli_hlt_subcommand(tpath)
     print("All CLI tests passed!")

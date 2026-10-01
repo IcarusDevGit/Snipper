@@ -4,8 +4,7 @@
   "title": "SnipperFindingsOutput",
   "type": "object",
   "required": [
-    "findings",
-    "unanswered_questions"
+    "findings"
   ],
   "properties": {
     "findings": {
@@ -13,10 +12,17 @@
       "items": {
         "type": "object",
         "required": [
-          "question_numbers",
           "snippet_text"
         ],
         "properties": {
+          "target_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
           "question_numbers": {
             "type": "array",
             "items": {
@@ -33,8 +39,7 @@
           "web_sources": {
             "type": "array",
             "items": {
-              "type": "string",
-              "format": "uri"
+              "type": "string"
             },
             "default": []
           },
@@ -44,10 +49,52 @@
               "type": "string"
             },
             "default": []
+          },
+          "concepts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "definition"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "definition": {
+                  "type": "string"
+                },
+                "source_url": {
+                  "type": "string"
+                }
+              }
+            },
+            "default": []
           }
         },
+        "anyOf": [
+          {
+            "required": [
+              "target_ids"
+            ]
+          },
+          {
+            "required": [
+              "question_numbers"
+            ]
+          }
+        ],
         "additionalProperties": false
       }
+    },
+    "unanswered_targets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "default": []
     },
     "unanswered_questions": {
       "type": "array",

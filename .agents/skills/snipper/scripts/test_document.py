@@ -7,7 +7,86 @@ if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
 from config import SnipperConfig
-from document import DocumentParser, export_to_txt, format_as_txt
+from document import DocumentParser, QuestionsParser, export_to_txt, format_as_txt
+
+
+def test_questions_parser_mixed_targets(tmp_path: Path):
+    q_file = tmp_path / "sample.questions.txt"
+    q_file.write_text(
+        "Q1: What are the encryption requirements?\n"
+        "  - Keywords: AES, encryption, at-rest\n"
+        "  - Concepts: Cryptographic Storage (web: true)\n"
+        "O1: Audit all external network connections.\n"
+        "  - Keywords: outbound, firewall, TLS\n"
+        "  - Concepts: Network Egress\n"
+        "Q2: How often are keys rotated?\n",
+        encoding="utf-8",
+    )
+
+    qp = QuestionsParser(SnipperConfig(palette=["#111111", "#222222", "#333333"]))
+    questions = qp.parse_file(q_file)
+
+    assert len(questions) == 3
+
+    assert questions[0].target_id == "Q1"
+    assert questions[0].target_type == "Q"
+    assert questions[0].text == "What are the encryption requirements?"
+    assert questions[0].keywords == ["AES", "encryption", "at-rest"]
+    assert len(questions[0].concepts) == 1
+    assert questions[0].concepts[0].name == "Cryptographic Storage"
+    assert questions[0].concepts[0].web_search is True
+    assert questions[0].color == "#111111"
+
+    assert questions[1].target_id == "O1"
+    assert questions[1].target_type == "O"
+    assert questions[1].text == "Audit all external network connections."
+    assert questions[1].keywords == ["outbound", "firewall", "TLS"]
+    assert questions[1].concepts[0].name == "Network Egress"
+    assert questions[1].concepts[0].web_search is False
+    assert questions[1].color == "#222222"
+
+    assert questions[2].target_id == "Q2"
+    assert questions[2].target_type == "Q"
+    assert questions[2].text == "How often are keys rotated?"
+    assert questions[2].color == "#333333"
+
+
+def test_parse_decoupled_document(tmp_path: Path):
+    doc_path = tmp_path / "report.docx"
+    q_path = tmp_path / "report.questions.txt"
+
+    q_path.write_text(
+        "Q1: What is the failover strategy?\n"
+        "  - Keywords: multi-region\n",
+        encoding="utf-8",
+    )
+
+    doc = docx.Document()
+    doc.add_paragraph("This is the first paragraph of clean document content.")
+    doc.add_paragraph("The system implements active-passive multi-region failover.")
+    doc.save(doc_path)
+
+    parser = DocumentParser()
+    parsed = parser.parse(doc_path)
+
+    # All paragraphs in clean docx become body_paragraphs
+    assert len(parsed.body_paragraphs) == 2
+    assert "active-passive" in parsed.body_text
+    assert len(parsed.questions) == 1
+    assert parsed.questions[0].target_id == "Q1"
+    assert parsed.questions_header_idx == -1
+
+    # Export to txt generates report.txt with clean [P#]
+    out_txt = export_to_txt(parsed)
+    assert out_txt == tmp_path / "report.txt"
+    assert out_txt.exists()
+    content = out_txt.read_text(encoding="utf-8")
+    assert "[P0] This is the first paragraph of clean document content." in content
+    assert "[P1] The system implements active-passive multi-region failover." in content
+    assert "=== QUESTIONS ===" not in content
+
+
+
 
 
 def test_parse_standard_document(tmp_path: Path):

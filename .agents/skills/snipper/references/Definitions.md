@@ -9,14 +9,14 @@ TARGET_AUDIENCE: AGENT_SYSTEM
 * **SEMANTICS**: The target text within the input document (`.docx`) evaluated for answers.
 * **INVARIANT**: Preserved in-place within the document; never truncated, reordered, or synthesized.
 
-### 1.2 QUESTIONS
-* **TYPE**: Ordered sequence of target queries (`List[Question]`).
-* **IDENTIFIER**: 1-indexed positive integers ($1, 2, \dots, N$).
-* **ASSOCIATION**: Each Question maps 1:1 to an assigned `COLOR`.
-* **METADATA**: Questions MAY be followed by `- Keywords:` sub-bullet items.
+### 1.2 TARGETS (QUESTIONS & OBJECTIVES)
+* **TYPE**: Ordered sequence of target queries (`List[Target]`).
+* **IDENTIFIERS**: String target identifiers: Questions (`Q1`, `Q2`, etc.) and Objectives (`O1`, `O2`, etc.).
+* **ASSOCIATION**: Each Target maps 1:1 to an assigned `COLOR`.
+* **METADATA**: Targets MAY be followed by `- Keywords:` and `- Concepts:` sub-bullet items.
 
 ### 1.3 MATCHES
-* **TYPE**: Lexical token occurrences in `BODY` matching targeted question `KEYWORDS` (or question noun lemmas if keywords are not yet resolved).
+* **TYPE**: Lexical token occurrences in `BODY` matching targeted question/objective `KEYWORDS` (or target noun lemmas if keywords are not yet resolved).
 * **LINGUISTIC_SCOPE**:
   * Parts of Speech: `NOUN`, `PROPN` (Proper Noun) or exact keyword terms.
   * Exclusions: Stop words (`is_stop == True`), verbs (`VERB`), prepositions (`ADP`), conjunctions (`CCONJ`, `SCONJ`).
@@ -24,14 +24,14 @@ TARGET_AUDIENCE: AGENT_SYSTEM
 * **DETERMINATION**: Programmatic execution (Code / Highlighter / Mutator). Targeted to keywords inside snippet spans.
 
 ### 1.4 SNIPPETS
-* **TYPE**: Verbatim text spans (`str`) extracted from `BODY` providing factual answers to one or more `QUESTIONS`.
-* **CARDINALITY**: A snippet MAY satisfy $\ge 1$ question simultaneously. Multiple snippets SHOULD be gathered to answer a question thoroughly.
-* **GRANULARITY**: Full contiguous sentences or paragraphs. Sub-sentence clauses are permitted only when answering a distinct sub-question.
+* **TYPE**: Verbatim text spans (`str`) extracted from `BODY` providing factual answers or evidence for one or more `TARGETS`.
+* **CARDINALITY**: A snippet MAY satisfy $\ge 1$ target simultaneously. Multiple snippets SHOULD be gathered to answer a target thoroughly.
+* **GRANULARITY**: Full contiguous sentences or paragraphs. Sub-sentence clauses are permitted only when answering a distinct sub-target.
 * **INTEGRITY**: Character-for-character identical to the source span in `BODY`. Zero alteration.
 
 ### 1.5 IDENTIFIERS
-* **TYPE**: Superscript Unicode numeric glyphs (e.g., `¹`, `²`, `³,⁴`).
-* **SEMANTICS**: Appended to snippets in the annotated `BODY` referencing the 1-indexed question number(s) answered by that span.
+* **TYPE**: Superscript Unicode glyphs (e.g., `Q¹`, `O¹`, `Q¹,O¹` or `¹`, `²`).
+* **SEMANTICS**: Appended to snippets in the annotated `BODY` referencing the target identifier(s) answered by that span.
 
 ### 1.6 COLORS & PALETTE
 * **PALETTE_TYPES**:
@@ -51,9 +51,10 @@ TARGET_AUDIENCE: AGENT_SYSTEM
 ## 2. STRUCTURAL & OVERLAP SPECIFICATIONS
 
 ### 2.1 IN-PLACE DOCUMENT MUTATION
-* The system loads the target input `.docx` file and modifies it directly.
+* The system loads the target input `.docx` file and modifies it directly in-place.
 * Document-level styles, non-body sections, headers, and metadata MUST be preserved.
 * Output is saved to the input path or designated target without generating an unstyled detached document.
+* Mutation is idempotent: summary block is prepended at paragraph 0 wrapped between `=== SNIPPER SUMMARY START ===` and `=== SNIPPER SUMMARY END ===`. Re-running clears previous summary blocks and body highlight styling before applying updated findings.
 
 ### 2.2 KEYWORDS & MATCHES INSIDE AND OUTSIDE SNIPPETS
 * If a `KEYWORD` or `MATCH` token falls within the character range of an answering `SNIPPET`:

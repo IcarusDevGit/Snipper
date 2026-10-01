@@ -1,72 +1,96 @@
 ---
-description: "Execute the Snipper pipeline on a Word document: resolve concepts, discover verbatim answer snippets, determine keywords, and mutate the document in-place."
+description: "Execute Snipper v0.4 workflows on Word documents: extract answer snippets (/snipper:snip), mutate documents in-place (/snipper:hlt), or query scoped findings (/snipper:lookup)."
 ---
 
-# /snipper Workflow
+# /snipper Workflow (v0.4)
 
-Execute semantic answer snippet discovery, concept resolution, keyword determination, and in-place document mutation on a Word document (`.docx`).
+Execute the decoupled Snipper v0.4 pipeline: extract semantic answer snippets for Questions & Objectives, mutate Word documents in-place with idempotent summary blocks and highlights, or perform scoped evidence retrieval across findings files.
 
-**Input**: Path to a target `.docx` file (e.g., `/snipper "Gerenciamento de Acesso do Postgresql.docx"`). If omitted, prompt the user for the document path or check active editor files.
+**Subcommands**:
+- `/snipper snip <path/to/doc.docx>`: Answer & Evidence Extraction (generates `<name>.findings.json`)
+- `/snipper hlt <path/to/doc.docx>`: Idempotent In-Place Document Highlighter (mutates `<name>.docx`)
+- `/snipper lookup "<query>" [--dir <path>] [--scope local|hierarchical|global] [--limit N]`: Scoped Findings Retrieval
 
 ---
 
-## Steps
+## Workflow 1: Answer & Evidence Extraction (`/snipper snip`)
 
-### 0. Mandatory Prerequisites & Constraints Ingestion
-1. Read the normative skill specifications:
-   - [SKILL.md](file:///c:/Dev/Highliter/.agents/skills/snipper/SKILL.md) (or [test-skill-directory/SKILL.md](file:///c:/Dev/Highliter/test-skill-directory/SKILL.md)): Core sequential protocol, RFC 2119 constraints, and interactive procedures.
-   - `references/CustomConstraints.md`: Runtime parameters and language configuration.
-   - `references/Definitions.md`: Entity taxonomy, overlap rules, and mutation model.
-   - `assets/palette.md`: Active 15-color hex palette.
-   - `references/findings.schema.json`: Formal findings payload schema.
-2. Verify that the active color palette and configuration defined in `CustomConstraints.md` and `palette.md` are loaded and enforced during pipeline execution.
-
-### 1. Document Ingestion, Backup & Section Parsing
-1. Identify the target `.docx` file. Ensure the file is not currently locked by Microsoft Word.
-2. **Duplicate & Conserve Backup**: Prior to mutation, ensure a duplicate copy of the target document is conserved (e.g. `<filename>.backup.docx` or in `Docs Backup/`) so that an untouched original is preserved.
-3. Ingest the document using `DocumentParser`:
-   - Identify `Questions` and `Body` boundaries.
-   - Parse questions and any sub-bullet metadata:
-     - `- Keywords: <comma-separated terms>`
-     - `- Concepts: <concept name> [(web: true)]`
-   - Generate/sync the lightweight text companion `<filename>.snipper.txt` via:
-     ```bash
-     python .agents/skills/snipper/scripts/cli.py dump "<path/to/document.docx>"
-     ```
-
-### 2. Stage 1: Concept Resolution & Interactive Source Selection
-1. For each concept associated with a question:
-   - **Internal Concept**: If `web_search == False`, extract factual definitions directly from the document `Body`.
-   - **External Concept (web: true)**:
-     - Search the web for clear, authoritative definitions.
-     - **Interactively prompt the user** using `ask_question`:
-       ```
-       Found candidate sources for concept '<Concept Name>':
-       1. [Source 1](url1) - Summary
-       2. [Source 2](url2) - Summary
-       Which source would you like to approve?
-       ```
-     - Record the approved `source_url` and final `definition`.
-
-### 3. Stage 2: Answers & Exhaustive Multi-Snippet Gathering
-1. Read the lightweight `<filename>.snipper.txt` companion file via `view_file` (100% full-text scan).
-2. For each question, extract **all** verbatim sentences or paragraphs containing factual evidence.
-3. **Mandatory Invariant**: Do NOT stop after a single sentence or clause. Comprehensive multi-snippet coverage is required across the full document text (`C-EXE-04`).
-4. **Paragraph Markers (`[P#]`)**: Do NOT copy `[P#]` markers into `snippet_text`. Text in `snippet_text` must match the source document character-for-character (`C-TXT-02`).
-
-### 4. Stage 3: Keywords Determination
-1. For each question:
-   - If the user provided `- Keywords:` sub-bullets, use and validate them.
-   - If omitted by the user, **deduce the essential keywords** required to answer each question from context (`C-EXE-05`).
-2. Format the findings payload conforming to `references/findings.schema.json` and save to a temporary findings JSON file (e.g. `findings_<doc_slug>.json`).
-
-### 5. Stage 4: Highlighter & Document Mutation
-1. Execute the document mutation:
+### 1. Ingestion & Companion Text Setup
+1. Identify the target `<name>.docx` file.
+2. Ensure `<name>.txt` companion exists with paragraph coordinates `[P#]`. If missing or out of date:
    ```bash
-   python .agents/skills/snipper/scripts/cli.py run "<path/to/document.docx>" --findings "<path/to/findings.json>"
+   python .agents/skills/snipper/scripts/cli.py dump "<path/to/document.docx>"
    ```
-2. Verify the document was mutated in-place and backup conserved:
-   - Backup copy `<filename>.backup.docx` exists and is intact (`C-DOC-04`).
-   - Summary block inserted before `Body` detailing questions, keywords, concept definitions, sources, and snippets with superscript citations.
-   - Keywords highlighted across the body text with question colors, and bolded inside answering snippets.
-3. Report completion to the user with a summary of answered questions, resolved concepts, and generated findings.
+3. Locate `<name>.questions.txt` (or explicit `--q <path>`).
+   - If user provided a legacy single document with embedded `Questions:` / `Body:`, parse both sections directly.
+   - Parse all Questions (`Q#`) and Objectives (`O#`) along with `- Keywords:` and `- Concepts:` sub-bullets.
+
+### 2. Concept Resolution & Interactive Disambiguation
+1. For each concept marked with `(web: true)`:
+   - Search the web for authoritative definitions.
+   - If multiple candidates exist, interactively prompt the user:
+     ```
+     Found candidate sources for concept '<Concept Name>':
+     1. [Source 1](url1) - Summary
+     2. [Source 2](url2) - Summary
+     Which source would you like to approve?
+     ```
+   - Record approved source URLs and definitions.
+
+### 3. Exhaustive Multi-Snippet Gathering (Agent Protocol)
+1. Read the lightweight `<name>.txt` companion file via `view_file` (100% full-text scan).
+2. For each question (`Q#`) and objective (`O#`), extract **all** verbatim sentences or paragraphs containing factual evidence.
+3. **Mandatory Invariants**:
+   - Comprehensive multi-snippet coverage is required across the full document text (`C-EXE-04`). Do NOT stop after a single sentence.
+   - Do NOT copy `[P#]` spatial markers into `snippet_text`. Text in `snippet_text` must match the source document character-for-character (`C-TXT-02`).
+   - Do NOT interpret, extrapolate, or generate synthetic commentary (`C-TXT-03`).
+
+### 4. Keywords Determination & Findings Emission
+1. For each target:
+   - If `- Keywords:` sub-bullets exist, validate and retain them.
+   - If omitted, deduce essential keywords from context (`C-EXE-05`).
+2. Format findings payload conforming to `references/findings.schema.json` using string `target_ids: ["Q1", "O1"]`.
+3. Save payload to `<name>.findings.json` (or specified `--out`).
+
+---
+
+## Workflow 2: Document Highlighter & In-Place Mutation (`/snipper hlt`)
+
+### 1. Pre-Mutation Verification
+1. Ensure the target `.docx` is not locked by Microsoft Word.
+2. Verify that `<name>.txt` companion exists as the ground-truth text backup (`C-DOC-04`). Duplicate `.backup.docx` creation is eliminated.
+
+### 2. Execute Idempotent Mutation
+1. Run the highlighter CLI:
+   ```bash
+   python .agents/skills/snipper/scripts/cli.py hlt "<path/to/document.docx>"
+   # or with explicit findings:
+   python .agents/skills/snipper/scripts/cli.py hlt "<path/to/document.docx>" --f "<path/to/findings.json>"
+   ```
+2. What the mutator executes:
+   - Identifies and strips any existing summary block between `=== SNIPPER SUMMARY START ===` and `=== SNIPPER SUMMARY END ===`.
+   - Clears existing highlight and bold styling from body paragraphs.
+   - Prepends fresh summary block at paragraph 0 detailing target questions, objectives, keywords, concept definitions, sources, and snippets with superscript citations (`Q¹`, `O¹`).
+   - Highlights keywords across the body text in the target's assigned color; bolds keywords inside answering snippet spans.
+   - Saves mutated document in-place.
+
+---
+
+## Workflow 3: Scoped Evidence Retrieval (`/snipper lookup`)
+
+### 1. Define Scope Boundary
+- `--scope local` (default): Scopes directory subtree rooted at `--dir`. If `--dir` is a Module, includes all child sub-modules. If `--dir` is a Sub-module, includes only that sub-module. Never ascends.
+- `--scope hierarchical`: Scopes local subtree and ascends upward to inherit ancestor keywords (`module.keywords.txt`, `library.keywords.txt`, etc.).
+- `--scope global`: Searches across all modules and sub-modules in the library.
+
+### 2. Execute Lookup
+```bash
+# Targeted search with lexical ranking capped at top N:
+python .agents/skills/snipper/scripts/cli.py lookup "<query>" --dir "<path>" --scope local --limit 5
+
+# Comprehensive search evaluating all scoped findings via LLM agent:
+python .agents/skills/snipper/scripts/cli.py lookup "<query>" --dir "<path>" --scope local
+```
+
+### 3. Display Results
+Snippet cards are presented with spatial coordinates (`[P#]`), target IDs, matched keywords, and relative document paths.

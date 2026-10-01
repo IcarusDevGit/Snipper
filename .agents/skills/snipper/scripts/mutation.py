@@ -1,6 +1,7 @@
 """In-place document mutation, summary block generation, and snippet overlay."""
 
 from pathlib import Path
+import re
 import sys
 from typing import Any, Dict, List, Optional, Tuple
 import docx
@@ -24,6 +25,47 @@ from highlighter import (
     find_keyword_matches_in_text,
 )
 from nlp import LemmaMatch
+
+SUMMARY_START_MARKER = "=== SNIPPER SUMMARY START ==="
+SUMMARY_END_MARKER = "=== SNIPPER SUMMARY END ==="
+
+
+def strip_existing_summary_block(doc: docx.Document) -> bool:
+    """Detects and strips any pre-existing summary block wrapped between delimiters or legacy blocks."""
+    paragraphs = doc.paragraphs
+    start_idx: Optional[int] = None
+    end_idx: Optional[int] = None
+
+    for idx, p in enumerate(paragraphs):
+        text = p.text.strip()
+        if text == SUMMARY_START_MARKER:
+            start_idx = idx
+        elif text == SUMMARY_END_MARKER and start_idx is not None:
+            end_idx = idx
+            break
+
+    if start_idx is not None and end_idx is not None:
+        # Check if there is an empty spacing line after end marker
+        remove_end = end_idx
+        if remove_end + 1 < len(paragraphs) and not paragraphs[remove_end + 1].text.strip():
+            remove_end += 1
+
+        for i in range(remove_end, start_idx - 1, -1):
+            p = paragraphs[i]
+            p._p.getparent().remove(p._p)
+        return True
+
+    return False
+
+
+def clean_paragraph_previous_mutation(paragraph: Paragraph) -> str:
+    """Removes trailing superscript citation runs from previous mutations to recover clean text."""
+    for r in list(paragraph.runs):
+        r_text = r.text.strip()
+        # If run consists purely of superscript digits and separators
+        if r_text and all(ch in "⁰¹²³⁴⁵⁶⁷⁸⁹," for ch in r_text):
+            paragraph._p.remove(r._r)
+    return paragraph.text
 
 
 def apply_paragraph_resolved_slices(
@@ -81,41 +123,64 @@ def insert_summary_block(
     findings_data: FindingsData,
     palette_mode: str = "hex",
 ):
-    """Inserts the Questions & Answers summary section before the Body container."""
-    if parsed.body_header_idx >= len(parsed.doc.paragraphs):
-        return
-    body_header_p = parsed.doc.paragraphs[parsed.body_header_idx]
+    """Inserts the Questions & Answers / Objectives summary block prepended at paragraph 0."""
+    doc = parsed.doc
+    strip_existing_summary_block(doc)
 
-    # Title: Questions & Answers
-    title_p = body_header_p.insert_paragraph_before()
+    if not doc.paragraphs:
+        anchor_p = doc.add_paragraph()
+    else:
+        anchor_p = doc.paragraphs[0]
+
+    # Start marker
+    start_p = anchor_p.insert_paragraph_before()
+    start_p.add_run(SUMMARY_START_MARKER)
+
+    # Title
+    title_p = anchor_p.insert_paragraph_before()
     title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title_run = title_p.add_run("Questions & Answers")
+    has_objectives = any(getattr(q, "target_type", "Q") == "O" for q in parsed.questions)
+    title_text = "Questions & Answers / Objectives" if has_objectives else "Questions & Answers"
+    title_run = title_p.add_run(title_text)
     title_run.bold = True
 
-    # Map findings by question number
-    findings_by_q: Dict[int, List[Any]] = {}
+    # Map findings by target_id and question number
+    findings_by_target: Dict[str, List[Any]] = {}
     for f in findings_data.findings:
-        for q_id in f.question_numbers:
-            findings_by_q.setdefault(q_id, []).append(f)
+        for tid in getattr(f, "target_ids", []):
+            findings_by_target.setdefault(tid, []).append(f)
+        for qid in f.question_numbers:
+            findings_by_target.setdefault(f"Q{qid}", []).append(f)
+            findings_by_target.setdefault(str(qid), []).append(f)
 
-    # Append each question and its answering evidence
+    # Append each target (Question or Objective) and answering evidence
     for q in parsed.questions:
-        q_p = body_header_p.insert_paragraph_before()
-        
-        # Color tag / prefix
-        prefix_run = q_p.add_run(f"Q{q.id}: ")
+        q_p = anchor_p.insert_paragraph_before()
+
+        target_id_str = getattr(q, "target_id", f"Q{q.id}")
+        prefix_run = q_p.add_run(f"{target_id_str}: ")
         prefix_run.bold = True
         is_hex = (palette_mode == "hex") or q.color.startswith("#")
         apply_highlight_to_run(prefix_run, q.color, is_hex)
 
-        # Question text
         q_text_run = q_p.add_run(q.text)
         q_text_run.bold = True
 
-        q_findings = findings_by_q.get(q.id, [])
-        is_unanswered = (q.id in findings_data.unanswered_questions) or not q_findings
+        # Resolve findings for this target
+        q_findings: List[Any] = []
+        for key in [target_id_str, f"Q{q.id}", str(q.id)]:
+            if key in findings_by_target:
+                for item in findings_by_target[key]:
+                    if item not in q_findings:
+                        q_findings.append(item)
 
-        # Collect keywords: combine q.keywords and findings keywords for this question
+        is_unanswered = (
+            (q.id in findings_data.unanswered_questions)
+            or (target_id_str in getattr(findings_data, "unanswered_targets", []))
+            or not q_findings
+        )
+
+        # Collect keywords: combine target keywords and finding keywords
         q_keywords: List[str] = list(q.keywords)
         for f in q_findings:
             for kw in f.keywords:
@@ -123,10 +188,10 @@ def insert_summary_block(
                     q_keywords.append(kw)
 
         if q_keywords:
-            kw_p = body_header_p.insert_paragraph_before()
+            kw_p = anchor_p.insert_paragraph_before()
             kw_p.add_run(f"  * Keywords: {', '.join(q_keywords)}")
 
-        # Collect and merge concepts for this question
+        # Collect and merge concepts for this target
         concept_dict: Dict[str, Dict[str, Optional[str]]] = {}
         concept_order: List[str] = []
 
@@ -162,7 +227,7 @@ def insert_summary_block(
             c_def = (c_info["definition"] or "").strip()
             c_url = (c_info["source_url"] or "").strip()
 
-            c_p = body_header_p.insert_paragraph_before()
+            c_p = anchor_p.insert_paragraph_before()
             if c_def:
                 text = f"  * Concept: {c_name} - {c_def}"
             else:
@@ -170,31 +235,37 @@ def insert_summary_block(
             if c_url:
                 text += f" (Source: {c_url})"
             c_p.add_run(text)
+
         if is_unanswered:
-            unanswered_p = body_header_p.insert_paragraph_before()
+            unanswered_p = anchor_p.insert_paragraph_before()
             unans_run = unanswered_p.add_run("  * Snippet: [No answering evidence found in text]")
             unans_run.italic = True
         else:
             for f in q_findings:
-                snip_p = body_header_p.insert_paragraph_before()
+                snip_p = anchor_p.insert_paragraph_before()
                 snip_run = snip_p.add_run(f'  * Snippet: "{f.snippet_text}"')
-                
+
                 # Superscript citation
-                sup_label = format_superscript_citations(f.question_numbers)
+                sup_source = getattr(f, "target_ids", None) or f.question_numbers
+                sup_label = format_superscript_citations(sup_source)
                 if sup_label:
                     sup_run = snip_p.add_run(sup_label)
                     apply_highlight_to_run(sup_run, q.color, is_hex)
 
                 if f.web_sources:
-                    src_p = body_header_p.insert_paragraph_before()
+                    src_p = anchor_p.insert_paragraph_before()
                     src_p.add_run("    Sources Consulted: " + ", ".join(f.web_sources))
 
-    # Blank spacing line before Body
-    body_header_p.insert_paragraph_before()
+    # End marker
+    end_p = anchor_p.insert_paragraph_before()
+    end_p.add_run(SUMMARY_END_MARKER)
+
+    # Spacing line before document body
+    anchor_p.insert_paragraph_before()
 
 
 class DocumentMutator:
-    """Orchestrates in-place document mutation and assembly."""
+    """Orchestrates in-place document mutation, highlighting, and idempotent summary replacement."""
 
     def __init__(self, config: Optional[SnipperConfig] = None):
         self.config = config or SnipperConfig()
@@ -208,6 +279,8 @@ class DocumentMutator:
     ):
         """Mutates the document in-place with summary block, highlights, and superscripts."""
         questions_by_id = {q.id: q for q in parsed.questions}
+        if not questions_by_id and parsed.questions:
+            questions_by_id = {i: q for i, q in enumerate(parsed.questions, start=1)}
 
         # Collect keywords across questions and findings
         keywords_by_q: Dict[int, List[str]] = {}
@@ -224,24 +297,29 @@ class DocumentMutator:
 
         has_keywords = any(keywords_by_q.values())
 
-        # Precompute snippet spans across paragraphs (supporting single and multi-paragraph snippets)
+        # Clean any trailing superscripts from previous mutations on body paragraphs
+        for p_idx, p_obj in parsed.body_paragraphs:
+            clean_paragraph_previous_mutation(p_obj)
+
+        # Precompute snippet spans across paragraphs
         paragraph_spans_by_idx: Dict[int, List[Tuple[int, int, List[int], str]]] = {
             p_idx: [] for p_idx, _ in parsed.body_paragraphs
         }
 
         # Build paragraph text offsets in body_text
-        para_offsets: List[Tuple[int, int, int]] = []  # (p_idx, start_offset, end_offset)
+        para_offsets: List[Tuple[int, int, int]] = []
         cur_offset = 0
         for p_idx, p_obj in parsed.body_paragraphs:
             p_len = len(p_obj.text)
             para_offsets.append((p_idx, cur_offset, cur_offset + p_len))
-            cur_offset += p_len + 1  # newline separator
+            cur_offset += p_len + 1
 
         full_body_text = parsed.body_text
 
         for f in findings_data.findings:
-            primary_q = min(f.question_numbers)
-            color = questions_by_id.get(primary_q, parsed.questions[0]).color
+            primary_q = min(f.question_numbers) if f.question_numbers else 1
+            default_color = parsed.questions[0].color if parsed.questions else "#FFFF00"
+            color = questions_by_id.get(primary_q, Question(1, "", 0, default_color)).color
 
             # 1. Try single-paragraph matching first
             matched_single = False
@@ -278,10 +356,8 @@ class DocumentMutator:
             if not p_text.strip():
                 continue
 
-            # Identify snippets present in this paragraph
-            snippet_spans: List[Tuple[int, int, List[int], str]] = paragraph_spans_by_idx.get(p_idx, [])
+            snippet_spans = paragraph_spans_by_idx.get(p_idx, [])
 
-            # If keywords were provided/discovered, use targeted keyword matches
             if has_keywords:
                 p_matches = find_keyword_matches_in_text(
                     keywords_by_q, questions_by_id, p_idx, p_text
@@ -289,8 +365,6 @@ class DocumentMutator:
             else:
                 p_matches = [m for m in matches if m.paragraph_idx == p_idx]
 
-            # Resolve paragraph styling: keywords and matches are highlighted across the body
-            # with the respective question's color, and bolded when intersecting snippet spans.
             slices = resolve_paragraph_styling(
                 paragraph_text=p_text,
                 paragraph_idx=p_idx,
@@ -299,10 +373,9 @@ class DocumentMutator:
                 matches_only_in_snippets=False,
             )
 
-            # Apply runs
             apply_paragraph_resolved_slices(p_obj, slices, palette_mode=self.config.palette_mode)
 
-        # 2. Insert Questions & Answers Summary Block
+        # 2. Insert / Replace Questions & Answers Summary Block at paragraph 0
         insert_summary_block(parsed, findings_data, palette_mode=self.config.palette_mode)
 
         # 3. Save modified document in-place

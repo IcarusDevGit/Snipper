@@ -217,10 +217,89 @@ def test_mutator_cross_paragraph_snippet(tmp_path: Path):
     assert any("¹" in r.text for r in p2.runs)
 
 
+def test_idempotent_remutation(tmp_path: Path):
+    doc_path = tmp_path / "remutate_test.docx"
+    q_path = tmp_path / "remutate_test.questions.txt"
+
+    q_path.write_text(
+        "Q1: What is the retention policy?\n"
+        "  - Keywords: retention, 7 years\n"
+        "O1: Audit all database backups.\n"
+        "  - Keywords: backups, S3\n",
+        encoding="utf-8",
+    )
+
+    doc = docx.Document()
+    doc.add_paragraph("The retention policy mandates keeping audit records for 7 years.")
+    doc.add_paragraph("All database backups are archived to immutable S3 buckets.")
+    doc.save(doc_path)
+
+    cfg = SnipperConfig()
+    parser = DocumentParser(cfg)
+    parsed = parser.parse(doc_path)
+
+    findings_pass1 = FindingsData(
+        findings=[
+            Finding(
+                question_numbers=[1],
+                target_ids=["Q1"],
+                snippet_text="The retention policy mandates keeping audit records for 7 years.",
+                keywords=["retention", "7 years"],
+            )
+        ]
+    )
+
+    mutator = DocumentMutator(cfg)
+    mutator.mutate(parsed, matches=[], findings_data=findings_pass1, output_path=doc_path)
+
+    # First verification
+    doc_v1 = docx.Document(doc_path)
+    paras_v1 = [p.text for p in doc_v1.paragraphs]
+    start_count_v1 = paras_v1.count("=== SNIPPER SUMMARY START ===")
+    end_count_v1 = paras_v1.count("=== SNIPPER SUMMARY END ===")
+    assert start_count_v1 == 1
+    assert end_count_v1 == 1
+    assert any("Q1: What is the retention policy?" in p for p in paras_v1)
+    assert not any("O1: Audit all database backups." in p and "Snippet:" in p for p in paras_v1)
+
+    # Second pass: re-parse and re-mutate with updated findings including O1
+    parsed_v2 = parser.parse(doc_path)
+    findings_pass2 = FindingsData(
+        findings=[
+            Finding(
+                question_numbers=[1],
+                target_ids=["Q1"],
+                snippet_text="The retention policy mandates keeping audit records for 7 years.",
+                keywords=["retention", "7 years"],
+            ),
+            Finding(
+                question_numbers=[2],
+                target_ids=["O1"],
+                snippet_text="All database backups are archived to immutable S3 buckets.",
+                keywords=["backups", "S3"],
+            ),
+        ]
+    )
+
+    mutator.mutate(parsed_v2, matches=[], findings_data=findings_pass2, output_path=doc_path)
+
+    # Second verification: must NOT have duplicated summary block
+    doc_v2 = docx.Document(doc_path)
+    paras_v2 = [p.text for p in doc_v2.paragraphs]
+    start_count_v2 = paras_v2.count("=== SNIPPER SUMMARY START ===")
+    end_count_v2 = paras_v2.count("=== SNIPPER SUMMARY END ===")
+    assert start_count_v2 == 1
+    assert end_count_v2 == 1
+    assert any("Q1: What is the retention policy?" in p for p in paras_v2)
+    assert any("O1: Audit all database backups." in p for p in paras_v2)
+    assert any('  * Snippet: "All database backups are archived to immutable S3 buckets."' in p for p in paras_v2)
+
+
 if __name__ == "__main__":
     with tempfile.TemporaryDirectory() as td:
         tpath = Path(td)
         test_document_mutator_end_to_end(tpath)
         test_mutator_renders_keywords_and_concepts_in_summary(tpath)
         test_mutator_cross_paragraph_snippet(tpath)
+        test_idempotent_remutation(tpath)
     print("Mutation tests passed!")

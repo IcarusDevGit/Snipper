@@ -48,10 +48,12 @@ class Concept:
 class Question:
     id: int
     text: str
-    paragraph_idx: int
-    color: str
+    paragraph_idx: int = 0
+    color: str = "#FFFF00"
     keywords: List[str] = field(default_factory=list)
     concepts: List[Concept] = field(default_factory=list)
+    target_type: str = "Q"  # "Q" or "O"
+    target_id: str = "Q1"
 
 
 @dataclass
@@ -75,13 +77,125 @@ class ParsedDocument:
         return export_to_txt(self, output_path)
 
 
-class DocumentParser:
-    """Parses a .docx file into structured Questions and Body containers."""
+class QuestionsParser:
+    """Parses decoupled questions.txt files containing Questions (Q#) and Objectives (O#)."""
 
     def __init__(self, config: Optional[SnipperConfig] = None):
         self.config = config or SnipperConfig()
 
-    def parse(self, file_path: Path | str) -> ParsedDocument:
+    def parse_file(self, file_path: Path | str) -> List[Question]:
+        path = Path(file_path)
+        if not path.exists():
+            raise FileNotFoundError(f"Questions file not found: {path}")
+        return self.parse_text(path.read_text(encoding="utf-8"))
+
+    def parse_text(self, text: str) -> List[Question]:
+        lines = text.splitlines()
+        raw_items: List[dict] = []
+
+        item_regex = re.compile(
+            r"^\s*(?:([QOqo])\s*(\d+)|(?:questions?|perguntas?)\s*(\d+)|(?:objectives?|objetivos?)\s*(\d+)|(\d+))\s*[:\-\.]\s*(.+)$",
+            re.IGNORECASE,
+        )
+
+        for line_idx, line in enumerate(lines):
+            stripped = line.strip()
+            if not stripped:
+                continue
+
+            # Keywords sub-bullet
+            kw_match = KEYWORDS_REGEX.match(stripped)
+            if kw_match and raw_items:
+                kw_content = kw_match.group(1).strip()
+                items = [k.strip() for k in re.split(r"[,;]", kw_content) if k.strip()]
+                raw_items[-1]["keywords"].extend(items)
+                continue
+
+            # Concepts sub-bullet
+            concept_match = CONCEPTS_REGEX.match(stripped)
+            if concept_match and raw_items:
+                concept_content = concept_match.group(1).strip()
+                items = [c.strip() for c in re.split(r"[,;]", concept_content) if c.strip()]
+                for item in items:
+                    web_search = bool(re.search(r"[\(\[]\s*web(?:\s*:\s*true)?\s*[\)\]]", item, re.IGNORECASE))
+                    clean_name = re.sub(r"[\(\[]\s*web(?:\s*:\s*true)?\s*[\)\]]", "", item, flags=re.IGNORECASE).strip()
+                    raw_items[-1]["concepts"].append(Concept(name=clean_name, web_search=web_search))
+                continue
+
+            # Target matching (Q1:, O1:, Question 1:, Objective 1:, 1.)
+            m = item_regex.match(stripped)
+            if m:
+                target_type = "Q"
+                target_num = 1
+                item_text = ""
+                if m.group(1) and m.group(2):
+                    target_type = m.group(1).upper()
+                    target_num = int(m.group(2))
+                    item_text = m.group(6).strip()
+                elif m.group(3):
+                    target_type = "Q"
+                    target_num = int(m.group(3))
+                    item_text = m.group(6).strip()
+                elif m.group(4):
+                    target_type = "O"
+                    target_num = int(m.group(4))
+                    item_text = m.group(6).strip()
+                elif m.group(5):
+                    target_type = "Q"
+                    target_num = int(m.group(5))
+                    item_text = m.group(6).strip()
+
+                target_id = f"{target_type}{target_num}"
+                raw_items.append({
+                    "id": target_num,
+                    "target_id": target_id,
+                    "target_type": target_type,
+                    "text": item_text,
+                    "line_idx": line_idx,
+                    "keywords": [],
+                    "concepts": [],
+                })
+            else:
+                cleaned = re.sub(r"^[-*•]\s*", "", stripped).strip()
+                if cleaned and not cleaned.startswith("#"):
+                    q_num = len(raw_items) + 1
+                    raw_items.append({
+                        "id": q_num,
+                        "target_id": f"Q{q_num}",
+                        "target_type": "Q",
+                        "text": cleaned,
+                        "line_idx": line_idx,
+                        "keywords": [],
+                        "concepts": [],
+                    })
+
+        palette = self.config.palette
+        palette_len = len(palette)
+        questions: List[Question] = []
+        for idx, item in enumerate(raw_items):
+            color = palette[idx % palette_len]
+            questions.append(
+                Question(
+                    id=item["id"],
+                    text=item["text"],
+                    paragraph_idx=item["line_idx"],
+                    color=color,
+                    keywords=item["keywords"],
+                    concepts=item["concepts"],
+                    target_type=item["target_type"],
+                    target_id=item["target_id"],
+                )
+            )
+        return questions
+
+
+class DocumentParser:
+    """Parses a .docx file into structured Questions and Body containers, supporting clean decoupled entries and legacy formats."""
+
+    def __init__(self, config: Optional[SnipperConfig] = None):
+        self.config = config or SnipperConfig()
+
+    def parse(self, file_path: Path | str, questions_file: Optional[Path | str] = None) -> ParsedDocument:
         path = Path(file_path)
         if not path.exists():
             raise FileNotFoundError(f"Input document not found: {path}")
@@ -89,6 +203,21 @@ class DocumentParser:
         doc = docx.Document(path)
         paragraphs = doc.paragraphs
 
+        # 1. Resolve external questions file if provided or matching <name>.questions.txt exists
+        q_path: Optional[Path] = None
+        if questions_file:
+            q_path = Path(questions_file)
+        else:
+            candidate = path.with_name(f"{path.stem}.questions.txt")
+            if candidate.exists():
+                q_path = candidate
+
+        external_questions: List[Question] = []
+        if q_path and q_path.exists():
+            qp = QuestionsParser(self.config)
+            external_questions = qp.parse_file(q_path)
+
+        # 2. Check for legacy embedded Questions and Body sections
         questions_idx: Optional[int] = None
         body_idx: Optional[int] = None
 
@@ -105,25 +234,46 @@ class DocumentParser:
                 body_idx = idx
                 break
 
-        if questions_idx is None:
-            raise ValueError("Could not locate 'Questions' section in document.")
+        # 3. Decoupled or clean document mode
+        if external_questions or questions_idx is None:
+            body_paragraphs: List[Tuple[int, Paragraph]] = []
+            in_summary_block = False
+
+            for idx, p in enumerate(paragraphs):
+                text = p.text.strip()
+                if text == "=== SNIPPER SUMMARY START ===":
+                    in_summary_block = True
+                    continue
+                if in_summary_block:
+                    if text == "=== SNIPPER SUMMARY END ===":
+                        in_summary_block = False
+                    continue
+                body_paragraphs.append((idx, p))
+
+            return ParsedDocument(
+                doc=doc,
+                file_path=path,
+                questions_header_idx=-1,
+                body_header_idx=0,
+                questions=external_questions,
+                body_paragraphs=body_paragraphs,
+            )
+
+        # 4. Legacy embedded Questions/Body mode
         if body_idx is None:
             raise ValueError("Could not locate 'Body' section in document.")
         if body_idx <= questions_idx:
             raise ValueError("'Body' section must appear after 'Questions' section.")
 
-        # Extract Questions with optional Keywords and Concepts sub-bullets
         raw_questions: List[dict] = []
         for idx in range(questions_idx + 1, body_idx):
             raw_text = paragraphs[idx].text.strip()
             if not raw_text:
                 continue
 
-            # If summary block was already inserted prior to Body, stop reading questions
             if re.match(r"^\s*questions\s*&\s*answers\s*$", raw_text, re.IGNORECASE):
                 break
 
-            # Check for Keywords sub-bullet
             kw_match = KEYWORDS_REGEX.match(raw_text)
             if kw_match and raw_questions:
                 kw_content = kw_match.group(1).strip()
@@ -131,7 +281,6 @@ class DocumentParser:
                 raw_questions[-1]["keywords"].extend(items)
                 continue
 
-            # Check for Concepts sub-bullet
             concept_match = CONCEPTS_REGEX.match(raw_text)
             if concept_match and raw_questions:
                 concept_content = concept_match.group(1).strip()
@@ -142,7 +291,6 @@ class DocumentParser:
                     raw_questions[-1]["concepts"].append(Concept(name=clean_name, web_search=web_search))
                 continue
 
-            # Strip leading list markers like "1.", "1 -", "-", "*"
             cleaned = re.sub(r"^(?:\d+[\.\-\)]\s*|[\*\-\•]\s*)", "", raw_text).strip()
             if cleaned:
                 raw_questions.append({
@@ -152,7 +300,6 @@ class DocumentParser:
                     "concepts": [],
                 })
 
-        # Assign colors
         palette = self.config.palette
         palette_len = len(palette)
         questions: List[Question] = []
@@ -171,11 +318,12 @@ class DocumentParser:
                     color=color,
                     keywords=q_data["keywords"],
                     concepts=q_data["concepts"],
+                    target_type="Q",
+                    target_id=f"Q{q_num}",
                 )
             )
 
-        # Extract Body paragraphs
-        body_paragraphs: List[Tuple[int, Paragraph]] = []
+        body_paragraphs = []
         for idx in range(body_idx + 1, len(paragraphs)):
             body_paragraphs.append((idx, paragraphs[idx]))
 
@@ -189,22 +337,27 @@ class DocumentParser:
         )
 
 
-def format_as_txt(parsed: ParsedDocument) -> str:
-    """Formats a ParsedDocument into zero-clutter plain text with paragraph tags."""
-    lines: List[str] = ["=== QUESTIONS ==="]
-    for q in parsed.questions:
-        lines.append(f"{q.id}. {q.text}")
-        if q.keywords:
-            lines.append(f"   - Keywords: {', '.join(q.keywords)}")
-        if q.concepts:
-            c_strs = [
-                f"{c.name} (web: true)" if c.web_search else c.name
-                for c in q.concepts
-            ]
-            lines.append(f"   - Concepts: {', '.join(c_strs)}")
+def format_as_txt(parsed: ParsedDocument, include_questions: Optional[bool] = None) -> str:
+    """Formats a ParsedDocument into plain text with paragraph tags."""
+    lines: List[str] = []
 
-    lines.append("")
-    lines.append("=== BODY ===")
+    should_include_q = include_questions if include_questions is not None else (parsed.questions_header_idx >= 0)
+
+    if should_include_q and parsed.questions:
+        lines.append("=== QUESTIONS ===")
+        for q in parsed.questions:
+            lines.append(f"{q.id}. {q.text}")
+            if q.keywords:
+                lines.append(f"   - Keywords: {', '.join(q.keywords)}")
+            if q.concepts:
+                c_strs = [
+                    f"{c.name} (web: true)" if c.web_search else c.name
+                    for c in q.concepts
+                ]
+                lines.append(f"   - Concepts: {', '.join(c_strs)}")
+        lines.append("")
+        lines.append("=== BODY ===")
+
     for i, (_, p_obj) in enumerate(parsed.body_paragraphs):
         lines.append(f"[P{i}] {p_obj.text}")
 
@@ -212,11 +365,14 @@ def format_as_txt(parsed: ParsedDocument) -> str:
 
 
 def export_to_txt(parsed: ParsedDocument, output_path: Optional[Path | str] = None) -> Path:
-    """Exports the parsed document as a lightweight .snipper.txt companion file."""
+    """Exports the parsed document as a companion .txt file."""
     if output_path:
         out = Path(output_path)
     else:
-        out = parsed.file_path.with_name(f"{parsed.file_path.stem}.snipper.txt")
+        if parsed.questions_header_idx >= 0:
+            out = parsed.file_path.with_name(f"{parsed.file_path.stem}.snipper.txt")
+        else:
+            out = parsed.file_path.with_name(f"{parsed.file_path.stem}.txt")
 
     content = format_as_txt(parsed)
     out.write_text(content, encoding="utf-8")
