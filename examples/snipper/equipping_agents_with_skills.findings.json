@@ -1,0 +1,65 @@
+{
+  "findings": [
+    {
+      "target_ids": ["Q1"],
+      "snippet_text": "An Agent Skill is a modular, filesystem-based folder that packages domain-specific instructions, workflows, reference materials, and helper scripts so a general-purpose AI agent can operate as a specialized practitioner.",
+      "keywords": ["Agent Skill", "SKILL.md", "YAML frontmatter", "name", "description"],
+      "web_sources": []
+    },
+    {
+      "target_ids": ["Q1"],
+      "snippet_text": "Every skill centers on a required SKILL.md file containing YAML frontmatter metadata (name and description) followed by Markdown instructions and optional subdirectories such as scripts/, references/, and assets/.",
+      "keywords": ["SKILL.md", "YAML frontmatter", "scripts/", "references/"],
+      "web_sources": []
+    },
+    {
+      "target_ids": ["Q2"],
+      "snippet_text": "To prevent context window bloat when dozens of skills are installed, agents use three-tier progressive disclosure rather than loading entire manuals upfront.",
+      "keywords": ["progressive disclosure", "context window", "metadata", "tokens"],
+      "web_sources": []
+    },
+    {
+      "target_ids": ["Q2"],
+      "snippet_text": "At startup, only the lightweight YAML name and description metadata enter the system prompt, costing only a few dozen tokens per skill; the full SKILL.md body is loaded on demand when a task matches, and deep reference files are read just-in-time only when a specific workflow branch requires them.",
+      "keywords": ["progressive disclosure", "metadata", "on demand", "tokens"],
+      "web_sources": []
+    },
+    {
+      "target_ids": ["Q3"],
+      "snippet_text": "Because modern agent runtimes provide sandboxed filesystem and shell access, skills bridge natural-language reasoning with deterministic code execution.",
+      "keywords": ["code execution", "deterministic", "filesystem", "scripts"],
+      "web_sources": []
+    },
+    {
+      "target_ids": ["Q3"],
+      "snippet_text": "Instead of asking the language model to generate fragile parsing or formatting logic via tokens, SKILL.md instructs the agent to invoke bundled Python or Bash scripts directly from scripts/ and consume only the resulting output, keeping script source code out of the context window.",
+      "keywords": ["SKILL.md", "scripts", "context window", "output"],
+      "web_sources": []
+    },
+    {
+      "target_ids": ["O1"],
+      "snippet_text": "Start with representative evaluation tasks to identify where the agent struggles, then refine the skill incrementally by observing real execution failures and feeding those patterns back into the instructions.",
+      "keywords": ["evaluation", "refine", "iterate", "instructions"],
+      "web_sources": []
+    },
+    {
+      "target_ids": ["O1"],
+      "snippet_text": "Structure skills for scale by keeping SKILL.md concise, splitting large schemas or domain catalogs into targeted reference files, and writing precise trigger-oriented descriptions so the agent knows exactly when to activate the skill.",
+      "keywords": ["scale", "SKILL.md", "reference files", "descriptions"],
+      "web_sources": []
+    },
+    {
+      "target_ids": ["O2"],
+      "snippet_text": "Installed skills effectively act as third-party code and prompt instructions running inside the agent environment, so teams should only adopt skills from trusted sources.",
+      "keywords": ["third-party", "trusted sources", "security"],
+      "web_sources": []
+    },
+    {
+      "target_ids": ["O2"],
+      "snippet_text": "Before enabling an external skill in production, audit all bundled Markdown directives, script code, and dependencies for unintended behavior, and treat instructions that access external networks or sensitive organizational data with strict caution.",
+      "keywords": ["audit", "dependencies", "external networks", "sensitive"],
+      "web_sources": []
+    }
+  ],
+  "unanswered_targets": []
+}

@@ -22,3 +22,22 @@ venv/
 # Backup and temporary Word documents
 *.backup.docx
 ~$*.docx
+
+# Google API Credentials & Tokens
+credentials.json
+token.json
+service_account.json
+
+# Local study documents & personal notes
+Docs/
+Docs Backup/
+Docs modified/
+snipper-v0.4.md
+snipper-v0.5.md
+
+# OpenSpec specifications, skills, and workflows
+openspec/
+.agents/skills/openspec-*/
+.agents/skills/.openspec-target
+.agents/workflows/opsx-*.md
+

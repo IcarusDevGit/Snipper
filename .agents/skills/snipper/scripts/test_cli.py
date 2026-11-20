@@ -171,9 +171,13 @@ def test_cli_full_pipeline_with_concepts_and_keywords(tmp_path: Path):
 
     assert any("Questions & Answers" in p for p in all_paras)
     assert any("Q1: What is relativity?" in p for p in all_paras)
-    assert any("  * Keywords: relativity, spacetime" in p for p in all_paras)
-    assert any("  * Concept: spacetime - Mathematical model joining space and time into a single continuum (Source: https://en.wikipedia.org/wiki/Spacetime)" in p for p in all_paras)
-    assert any('  * Snippet: "Einstein formulated relativity. In physics, spacetime describes the unified fabric of the universe."' in p for p in all_paras)
+    assert "Keywords:" in all_paras
+    assert "  • relativity" in all_paras
+    assert "  • spacetime" in all_paras
+    assert "Concepts:" in all_paras
+    assert "  • spacetime - Mathematical model joining space and time into a single continuum (Source: https://en.wikipedia.org/wiki/Spacetime)" in all_paras
+    assert any('"Einstein formulated relativity. In physics, spacetime describes the unified fabric of the universe."' in p for p in all_paras)
+    assert not any("Snippet:" in p for p in all_paras)
 
     body_idx = next(i for i, p in enumerate(mutated.paragraphs) if p.text.strip().lower() == "body")
     body_p = mutated.paragraphs[body_idx + 1]
@@ -312,6 +316,100 @@ def test_cli_lookup_subcommand(tmp_path: Path, capsys):
     assert "TLS 1.3 is enforced on all endpoints." in captured.out
 
 
+def test_resolve_questions_path_gdoc_companion(tmp_path: Path):
+    from unittest.mock import MagicMock
+    from cli import resolve_questions_path
+
+    # 1. Local resolution with .questions
+    doc_path = tmp_path / "lesson.docx"
+    q_path = tmp_path / "lesson.questions"
+    q_path.write_text("Q1: Local test", encoding="utf-8")
+    assert resolve_questions_path(None, doc_path) == q_path
+
+    # 2. Remote resolution with .questions and .questions.gdoc
+    mock_storage = MagicMock()
+    mock_storage.library_folder_id = "lib-123"
+
+    def fake_exists(path):
+        return path == "Module1/Lesson.questions"
+
+    mock_storage.exists.side_effect = fake_exists
+
+    resolved = resolve_questions_path(None, "Module1/Lesson.gdoc", storage_provider=mock_storage)
+    assert resolved == "Module1/Lesson.questions"
+
+
+def test_cli_storage_flag_and_local_detection(tmp_path: Path):
+    doc_path = tmp_path / "local_flag_test.docx"
+    q_path = tmp_path / "local_flag_test.questions.txt"
+    f_path = tmp_path / "local_flag_test.findings.json"
+
+    doc = docx.Document()
+    doc.add_paragraph("Local test paragraph content.")
+    doc.save(doc_path)
+
+    q_path.write_text("Q1: What is tested?\n", encoding="utf-8")
+    f_path.write_text('{"findings": [{"question_numbers": [1], "snippet_text": "Local test paragraph content."}], "unanswered_questions": []}', encoding="utf-8")
+
+    # 1. Test explicit --storage local
+    ret = main(["hlt", str(doc_path), "--storage", "local"])
+    assert ret == 0
+
+    # 2. Test auto-detection of local path without --storage flag
+    ret2 = main(["snip", str(doc_path)])
+    assert ret2 == 0
+
+
+def test_cli_lookup_positional_query_and_out_alias(tmp_path: Path, capsys):
+    doc_path = tmp_path / "pos_lookup.docx"
+    f_path = tmp_path / "pos_lookup.findings.json"
+    out_txt = tmp_path / "custom_out.txt"
+
+    f_path.write_text(
+        """{
+            "findings": [
+                {
+                    "target_ids": ["Q1"],
+                    "snippet_text": "Zero-trust authentication verifies every request.",
+                    "keywords": ["Zero-trust", "authentication"]
+                }
+            ],
+            "unanswered_targets": []
+        }""",
+        encoding="utf-8",
+    )
+
+    doc = docx.Document()
+    doc.add_paragraph("Zero-trust authentication verifies every request.")
+    doc.save(doc_path)
+
+    # Positional query in lookup
+    ret = main(["lookup", "Zero-trust", "--dir", str(tmp_path), "--limit", "5"])
+    assert ret == 0
+    captured = capsys.readouterr()
+    assert "Zero-trust authentication verifies every request." in captured.out
+
+    # --out alias in dump
+    ret_dump = main(["dump", str(doc_path), "--out", str(out_txt)])
+    assert ret_dump == 0
+    assert out_txt.exists()
+
+
+def test_cli_no_hardcoded_gdrive_folder_id(tmp_path: Path, monkeypatch):
+    from cli import _apply_storage_config
+    from config import SnipperConfig
+
+    cfg = SnipperConfig()
+    monkeypatch.delenv("SNIPPER_LIBRARY_FOLDER_ID", raising=False)
+    _apply_storage_config(cfg, "Module/lesson.gdoc")
+    assert cfg.storage_backend == "gdoc"
+    assert cfg.library_folder_id is None
+
+    monkeypatch.setenv("SNIPPER_LIBRARY_FOLDER_ID", "env-folder-123")
+    _apply_storage_config(cfg, "Module/lesson.gdoc")
+    assert cfg.library_folder_id == "env-folder-123"
+
+
 if __name__ == "__main__":
     with tempfile.TemporaryDirectory() as td:
         tpath = Path(td)
@@ -324,4 +422,5 @@ if __name__ == "__main__":
         test_cli_auto_sync_txt(tpath)
         test_cli_snip_subcommand(tpath)
         test_cli_hlt_subcommand(tpath)
+        test_cli_storage_flag_and_local_detection(tpath)
     print("All CLI tests passed!")

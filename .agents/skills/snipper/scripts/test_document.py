@@ -1,5 +1,6 @@
-import sys
+import io
 from pathlib import Path
+import sys
 import docx
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
@@ -251,6 +252,119 @@ def test_verbatim_character_fidelity(tmp_path: Path):
     assert f"[P0] {tricky_sentence}" in content
 
 
+def test_parse_from_in_memory_stream():
+    import io
+    doc = docx.Document()
+    doc.add_paragraph("Paragraph zero text.")
+    doc.add_paragraph("Paragraph one text.")
+    stream = io.BytesIO()
+    doc.save(stream)
+    stream.seek(0)
+
+    parser = DocumentParser()
+    parsed = parser.parse(
+        stream,
+        questions_text="Q1: What is in paragraph zero?\n  - Keywords: zero\n",
+        virtual_path="virtual_doc.docx",
+    )
+
+    assert len(parsed.body_paragraphs) == 2
+    assert parsed.body_paragraphs[0][1].text == "Paragraph zero text."
+    assert len(parsed.questions) == 1
+    assert parsed.questions[0].target_id == "Q1"
+    assert parsed.questions[0].text == "What is in paragraph zero?"
+    assert parsed.file_path == Path("virtual_doc.docx")
+
+
+def test_export_txt_with_storage_provider():
+    import io
+    from storage import LocalStorageProvider
+
+    doc = docx.Document()
+    doc.add_paragraph("Body line.")
+    stream = io.BytesIO()
+    doc.save(stream)
+    stream.seek(0)
+
+    parser = DocumentParser()
+    parsed = parser.parse(stream, virtual_path="module/entry.docx")
+
+    mock_storage = LocalStorageProvider()
+    mock_storage.write_text = lambda target_dir, filename, text: f"uploaded://{target_dir}/{filename}"
+
+    result = parsed.export_txt(storage_provider=mock_storage)
+    assert result == "uploaded://module/entry.txt"
+
+
+def test_parse_plain_text_stream_gdoc():
+    """Verifies that an in-memory plain text stream (from Drive files().export) is parsed cleanly."""
+    raw_text = "First paragraph from Google Doc.\nSecond paragraph discussing encryption and access controls.\n"
+    stream = io.BytesIO(raw_text.encode("utf-8"))
+
+    parser = DocumentParser()
+    parsed = parser.parse(
+        stream,
+        questions_text="Q1: What controls access?\n  - Keywords: access, encryption\n",
+        virtual_path="Module1/Lesson.gdoc",
+    )
+
+    assert len(parsed.body_paragraphs) == 2
+    assert parsed.body_paragraphs[0][1].text == "First paragraph from Google Doc."
+    assert parsed.body_paragraphs[1][1].text == "Second paragraph discussing encryption and access controls."
+    assert len(parsed.questions) == 1
+    assert parsed.questions[0].target_id == "Q1"
+    assert parsed.questions[0].keywords == ["access", "encryption"]
+    assert "encryption" in parsed.body_text
+
+
+def test_parse_decoupled_questions_gdoc_extension(tmp_path: Path):
+    """Verifies discovery of <stem>.questions and <stem>.questions.gdoc companion files."""
+    doc_path = tmp_path / "notes.docx"
+    doc = docx.Document()
+    doc.add_paragraph("Content line.")
+    doc.save(doc_path)
+
+    q_gdoc = tmp_path / "notes.questions"
+    q_gdoc.write_text("Q1: Question from .questions file?\n", encoding="utf-8")
+
+    parser = DocumentParser()
+    parsed = parser.parse(doc_path)
+    assert len(parsed.questions) == 1
+    assert parsed.questions[0].text == "Question from .questions file?"
+
+
+def test_export_txt_bypasses_write_when_gdoc():
+    """Verifies that export_to_txt does NOT write any files when storage_backend == 'gdoc'."""
+    from storage import LocalStorageProvider
+
+    doc = docx.Document()
+    doc.add_paragraph("Body paragraph.")
+    stream = io.BytesIO()
+    doc.save(stream)
+    stream.seek(0)
+
+    parser = DocumentParser()
+    parsed = parser.parse(stream, virtual_path="module/entry.gdoc")
+
+    storage = LocalStorageProvider()
+    storage.backend = "gdoc"
+    storage.storage_backend = "gdoc"
+    write_called = False
+
+    def fake_write(target_dir, filename, text):
+        nonlocal write_called
+        write_called = True
+        return f"{target_dir}/{filename}"
+
+    storage.write_text = fake_write
+
+    cfg = SnipperConfig(storage_backend="gdoc")
+    res = parsed.export_txt(storage_provider=storage, config=cfg)
+
+    assert write_called is False
+    assert res == "entry.txt"
+
+
 if __name__ == "__main__":
     import tempfile
     with tempfile.TemporaryDirectory() as td:
@@ -260,4 +374,7 @@ if __name__ == "__main__":
         test_parse_sub_bullet_keywords_and_concepts(tpath)
         test_export_to_txt(tpath)
         test_verbatim_character_fidelity(tpath)
+        test_parse_from_in_memory_stream()
+        test_export_txt_with_storage_provider()
     print("Document parser tests passed!")
+

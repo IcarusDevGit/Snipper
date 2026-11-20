@@ -188,3 +188,45 @@ class FindingsData:
         content = p.read_text(encoding="utf-8")
         data = json.loads(content)
         return cls.from_dict(data)
+
+    @classmethod
+    def from_json(cls, json_str_or_bytes: Union[str, bytes]) -> "FindingsData":
+        """Deserializes FindingsData from a JSON string or bytes."""
+        if isinstance(json_str_or_bytes, bytes):
+            json_str = json_str_or_bytes.decode("utf-8")
+        else:
+            json_str = json_str_or_bytes
+        data = json.loads(json_str)
+        return cls.from_dict(data)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serializes FindingsData to a dictionary."""
+        out_findings = []
+        for f in self.findings:
+            f_dict: Dict[str, Any] = {
+                "question_numbers": f.question_numbers,
+                "target_ids": f.target_ids,
+                "snippet_text": f.snippet_text,
+                "web_sources": f.web_sources,
+                "keywords": f.keywords,
+                "concepts": [
+                    {
+                        "name": c.name,
+                        "definition": c.definition,
+                        "source_url": c.source_url,
+                    }
+                    for c in f.concepts
+                ],
+            }
+            out_findings.append(f_dict)
+
+        return {
+            "findings": out_findings,
+            "unanswered_questions": self.unanswered_questions,
+            "unanswered_targets": self.unanswered_targets,
+        }
+
+    def to_json(self, indent: int = 2) -> str:
+        """Serializes FindingsData to a formatted JSON string."""
+        return json.dumps(self.to_dict(), indent=indent, ensure_ascii=False)
+

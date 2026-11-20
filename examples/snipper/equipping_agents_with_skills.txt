@@ -1,0 +1,16 @@
+[P0] Equipping Agents for the Real World with Agent Skills
+[P1] 1. What Is an Agent Skill?
+[P2] An Agent Skill is a modular, filesystem-based folder that packages domain-specific instructions, workflows, reference materials, and helper scripts so a general-purpose AI agent can operate as a specialized practitioner.
+[P3] Every skill centers on a required SKILL.md file containing YAML frontmatter metadata (name and description) followed by Markdown instructions and optional subdirectories such as scripts/, references/, and assets/.
+[P4] 2. Preventing Context Window Bloat via Progressive Disclosure
+[P5] To prevent context window bloat when dozens of skills are installed, agents use three-tier progressive disclosure rather than loading entire manuals upfront.
+[P6] At startup, only the lightweight YAML name and description metadata enter the system prompt, costing only a few dozen tokens per skill; the full SKILL.md body is loaded on demand when a task matches, and deep reference files are read just-in-time only when a specific workflow branch requires them.
+[P7] 3. Combining Instructions with Executable Scripts
+[P8] Because modern agent runtimes provide sandboxed filesystem and shell access, skills bridge natural-language reasoning with deterministic code execution.
+[P9] Instead of asking the language model to generate fragile parsing or formatting logic via tokens, SKILL.md instructs the agent to invoke bundled Python or Bash scripts directly from scripts/ and consume only the resulting output, keeping script source code out of the context window.
+[P10] 4. Best Practices for Authoring Reliable Skills
+[P11] Start with representative evaluation tasks to identify where the agent struggles, then refine the skill incrementally by observing real execution failures and feeding those patterns back into the instructions.
+[P12] Structure skills for scale by keeping SKILL.md concise, splitting large schemas or domain catalogs into targeted reference files, and writing precise trigger-oriented descriptions so the agent knows exactly when to activate the skill.
+[P13] 5. Security and Auditing Considerations
+[P14] Installed skills effectively act as third-party code and prompt instructions running inside the agent environment, so teams should only adopt skills from trusted sources.
+[P15] Before enabling an external skill in production, audit all bundled Markdown directives, script code, and dependencies for unintended behavior, and treat instructions that access external networks or sensitive organizational data with strict caution.

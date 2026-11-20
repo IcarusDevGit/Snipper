@@ -75,8 +75,8 @@ The application CLI is executed directly through the self-contained script `pyth
 ```bash
 # Workflow 1: Snip (Answer & Evidence Discovery)
 python .agents/skills/snipper/scripts/cli.py snip <path/to/document.docx>
-# with explicit questions or output paths:
-python .agents/skills/snipper/scripts/cli.py snip <path/to/document.docx> --q <path/to/questions.txt> --out <path/to/findings.json>
+# with explicit questions or companion output path:
+python .agents/skills/snipper/scripts/cli.py snip <path/to/document.docx> --q <path/to/questions.txt> --out <path/to/companion.txt>
 
 # Workflow 2: Highlighter (Idempotent In-Place Document Mutation)
 python .agents/skills/snipper/scripts/cli.py hlt <path/to/document.docx>
@@ -117,7 +117,7 @@ All agent actions and programmatic implementations MUST adhere to these strict c
 * `C-DOC-01`: **Idempotent In-Place Mutation**: The system MUST perform in-place mutation on the input `.docx` file prepending the summary block at paragraph 0 wrapped between `=== SNIPPER SUMMARY START ===` and `=== SNIPPER SUMMARY END ===`. Existing summary blocks and previous body highlights MUST be cleanly stripped before reapplying mutations.
 * `C-DOC-02`: Multi-paragraph snippets MUST be partitioned across `<w:p>` boundaries into paragraph-conforming runs. Run elements MUST NOT cross paragraph delimiters.
 * `C-DOC-03`: **Targeted Keyword Highlighting**: Document mutation MUST highlight target keywords across the body text with their target's assigned color (both inside and outside snippet spans), and MUST bold keywords when they fall within answering snippet spans.
-* `C-DOC-04`: **Text Companion as Ground-Truth Backup**: The plain-text companion `<name>.txt` serves as the primary text backup. Duplicate `.backup.docx` generation is eliminated.
+* `C-DOC-04`: **Text Companion as Ground-Truth Backup (Word Only)**: For local Word documents (`.docx`), the plain-text companion `<name>.txt` serves as the primary text backup. When using Google Drive / Google Docs (`.gdoc`), Google Drive provides native cloud revision history, and `.txt` files MUST NOT be generated or uploaded.
 
 ### 2.4 External Knowledge Constraints
 * `C-EXT-01`: The agent MUST NOT use web search or external world knowledge to formulate answer snippets. Every answer MUST be present in `BODY`.
@@ -181,13 +181,24 @@ The findings payload emitted by `/snipper:snip` conforms to `findings.schema.jso
 2. **Delimited Summary Block**: Prepend summary at paragraph 0:
    ```text
    === SNIPPER SUMMARY START ===
-   Questions & Objectives Summary
+   Questions & Answers / Objectives
+
    Q1: What are the main risk factors?
-     * Keywords: risk, exposure, default
-     * Snippet: "..." (Q¹)
+   Keywords:
+     • risk
+     • exposure
+     • default
+
+   "..." Q¹
+
    O1: Identify all mitigation strategies.
-     * Keywords: mitigation, hedging, collateral
-     * Snippet: "..." (O¹)
+   Keywords:
+     • mitigation
+     • hedging
+     • collateral
+
+   "..." O¹
+
    === SNIPPER SUMMARY END ===
    ```
 3. **Re-mutation Safety**: When `snipper hlt` runs on an already-mutated `.docx`, it identifies and deletes all paragraphs between `=== SNIPPER SUMMARY START ===` and `=== SNIPPER SUMMARY END ===`, clears run highlight and bold properties from body paragraphs, and writes fresh mutations without duplicating blocks or stacking highlights.

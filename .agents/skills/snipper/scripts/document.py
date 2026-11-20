@@ -1,11 +1,12 @@
 """Document ingestion, resilient section parsing, and question indexing."""
 
 from dataclasses import dataclass, field
+import io
 from pathlib import Path
 import random
 import re
 import sys
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Union
 import docx
 from docx.text.paragraph import Paragraph
 
@@ -59,7 +60,7 @@ class Question:
 @dataclass
 class ParsedDocument:
     doc: docx.Document
-    file_path: Path
+    file_path: Union[Path, str]
     questions_header_idx: int
     body_header_idx: int
     questions: List[Question] = field(default_factory=list)
@@ -73,8 +74,13 @@ class ParsedDocument:
     def annotated_text(self) -> str:
         return format_as_txt(self)
 
-    def export_txt(self, output_path: Optional[Path | str] = None) -> Path:
-        return export_to_txt(self, output_path)
+    def export_txt(
+        self,
+        output_path: Optional[Union[Path, str]] = None,
+        storage_provider: Optional[Any] = None,
+        config: Optional[SnipperConfig] = None,
+    ) -> Union[Path, str]:
+        return export_to_txt(self, output_path, storage_provider=storage_provider, config=config)
 
 
 class QuestionsParser:
@@ -90,8 +96,15 @@ class QuestionsParser:
         return self.parse_text(path.read_text(encoding="utf-8"))
 
     def parse_text(self, text: str) -> List[Question]:
-        lines = text.splitlines()
+        clean_text = text.lstrip("\ufeff")
+        lines = clean_text.splitlines()
         raw_items: List[dict] = []
+        current_section = "Q"
+
+        section_regex = re.compile(
+            r"^\s*(?:#+\s*)?(?:(questions?|perguntas?)|(objectives?|objetivos?))\s*:?\s*$",
+            re.IGNORECASE,
+        )
 
         item_regex = re.compile(
             r"^\s*(?:([QOqo])\s*(\d+)|(?:questions?|perguntas?)\s*(\d+)|(?:objectives?|objetivos?)\s*(\d+)|(\d+))\s*[:\-\.]\s*(.+)$",
@@ -99,8 +112,17 @@ class QuestionsParser:
         )
 
         for line_idx, line in enumerate(lines):
-            stripped = line.strip()
+            stripped = line.strip().lstrip("\ufeff")
             if not stripped:
+                continue
+
+            # Section header matching (e.g. "Questions", "Objectives")
+            sec_match = section_regex.match(stripped)
+            if sec_match:
+                if sec_match.group(1):
+                    current_section = "Q"
+                elif sec_match.group(2):
+                    current_section = "O"
                 continue
 
             # Keywords sub-bullet
@@ -125,7 +147,7 @@ class QuestionsParser:
             # Target matching (Q1:, O1:, Question 1:, Objective 1:, 1.)
             m = item_regex.match(stripped)
             if m:
-                target_type = "Q"
+                target_type = current_section
                 target_num = 1
                 item_text = ""
                 if m.group(1) and m.group(2):
@@ -141,7 +163,7 @@ class QuestionsParser:
                     target_num = int(m.group(4))
                     item_text = m.group(6).strip()
                 elif m.group(5):
-                    target_type = "Q"
+                    target_type = current_section
                     target_num = int(m.group(5))
                     item_text = m.group(6).strip()
 
@@ -157,12 +179,12 @@ class QuestionsParser:
                 })
             else:
                 cleaned = re.sub(r"^[-*•]\s*", "", stripped).strip()
-                if cleaned and not cleaned.startswith("#"):
+                if cleaned and not cleaned.startswith("#") and not section_regex.match(cleaned):
                     q_num = len(raw_items) + 1
                     raw_items.append({
                         "id": q_num,
-                        "target_id": f"Q{q_num}",
-                        "target_type": "Q",
+                        "target_id": f"{current_section}{q_num}",
+                        "target_type": current_section,
                         "text": cleaned,
                         "line_idx": line_idx,
                         "keywords": [],
@@ -195,27 +217,73 @@ class DocumentParser:
     def __init__(self, config: Optional[SnipperConfig] = None):
         self.config = config or SnipperConfig()
 
-    def parse(self, file_path: Path | str, questions_file: Optional[Path | str] = None) -> ParsedDocument:
-        path = Path(file_path)
-        if not path.exists():
-            raise FileNotFoundError(f"Input document not found: {path}")
+    def parse(
+        self,
+        file_path: Union[Path, str, io.BytesIO],
+        questions_file: Optional[Union[Path, str, io.BytesIO]] = None,
+        questions_text: Optional[str] = None,
+        virtual_path: Optional[Union[Path, str]] = None,
+    ) -> ParsedDocument:
+        if isinstance(file_path, (io.BytesIO, io.BufferedIOBase)) or hasattr(file_path, "read"):
+            try:
+                if hasattr(file_path, "seek"):
+                    file_path.seek(0)
+                doc = docx.Document(file_path)
+                effective_path = Path(virtual_path or "document.docx")
+            except Exception:
+                if hasattr(file_path, "seek"):
+                    file_path.seek(0)
+                raw_bytes = file_path.read()
+                if isinstance(raw_bytes, bytes):
+                    content = raw_bytes.decode("utf-8", errors="replace")
+                else:
+                    content = str(raw_bytes)
+                doc = docx.Document()
+                for line in content.splitlines():
+                    doc.add_paragraph(line)
+                effective_path = Path(virtual_path or "document.gdoc")
+        else:
+            path = Path(file_path)
+            if not path.exists():
+                raise FileNotFoundError(f"Input document not found: {path}")
+            try:
+                doc = docx.Document(path)
+            except Exception:
+                content = path.read_text(encoding="utf-8", errors="replace")
+                doc = docx.Document()
+                for line in content.splitlines():
+                    doc.add_paragraph(line)
+            effective_path = path
 
-        doc = docx.Document(path)
         paragraphs = doc.paragraphs
 
-        # 1. Resolve external questions file if provided or matching <name>.questions.txt exists
-        q_path: Optional[Path] = None
-        if questions_file:
-            q_path = Path(questions_file)
-        else:
-            candidate = path.with_name(f"{path.stem}.questions.txt")
-            if candidate.exists():
-                q_path = candidate
-
+        # 1. Resolve external questions
         external_questions: List[Question] = []
-        if q_path and q_path.exists():
+        if questions_text is not None:
             qp = QuestionsParser(self.config)
-            external_questions = qp.parse_file(q_path)
+            external_questions = qp.parse_text(questions_text)
+        elif isinstance(questions_file, (io.BytesIO, io.BufferedIOBase)) or hasattr(questions_file, "read"):
+            qp = QuestionsParser(self.config)
+            content = questions_file.read()
+            if isinstance(content, bytes):
+                content = content.decode("utf-8")
+            external_questions = qp.parse_text(content)
+        elif questions_file:
+            q_path = Path(questions_file)
+            if q_path.exists():
+                qp = QuestionsParser(self.config)
+                external_questions = qp.parse_file(q_path)
+        elif effective_path.exists():
+            candidates = [
+                effective_path.with_name(f"{effective_path.stem}.questions"),
+                effective_path.with_name(f"{effective_path.stem}.questions.gdoc"),
+                effective_path.with_name(f"{effective_path.stem}.questions.txt"),
+            ]
+            for candidate in candidates:
+                if candidate.exists():
+                    qp = QuestionsParser(self.config)
+                    external_questions = qp.parse_file(candidate)
+                    break
 
         # 2. Check for legacy embedded Questions and Body sections
         questions_idx: Optional[int] = None
@@ -240,19 +308,19 @@ class DocumentParser:
             in_summary_block = False
 
             for idx, p in enumerate(paragraphs):
-                text = p.text.strip()
-                if text == "=== SNIPPER SUMMARY START ===":
+                text = p.text.strip().lstrip("\ufeff")
+                if text == "=== SNIPPER SUMMARY START ===" or text.startswith("=== SNIPPER SUMMARY START ==="):
                     in_summary_block = True
                     continue
                 if in_summary_block:
-                    if text == "=== SNIPPER SUMMARY END ===":
+                    if text == "=== SNIPPER SUMMARY END ===" or text.endswith("=== SNIPPER SUMMARY END ==="):
                         in_summary_block = False
                     continue
                 body_paragraphs.append((idx, p))
 
             return ParsedDocument(
                 doc=doc,
-                file_path=path,
+                file_path=effective_path,
                 questions_header_idx=-1,
                 body_header_idx=0,
                 questions=external_questions,
@@ -329,7 +397,7 @@ class DocumentParser:
 
         return ParsedDocument(
             doc=doc,
-            file_path=path,
+            file_path=effective_path,
             questions_header_idx=questions_idx,
             body_header_idx=body_idx,
             questions=questions,
@@ -364,16 +432,43 @@ def format_as_txt(parsed: ParsedDocument, include_questions: Optional[bool] = No
     return "\n".join(lines) + "\n"
 
 
-def export_to_txt(parsed: ParsedDocument, output_path: Optional[Path | str] = None) -> Path:
-    """Exports the parsed document as a companion .txt file."""
+def export_to_txt(
+    parsed: ParsedDocument,
+    output_path: Optional[Union[Path, str]] = None,
+    storage_provider: Optional[Any] = None,
+    config: Optional[SnipperConfig] = None,
+) -> Union[Path, str]:
+    """Exports the parsed document as a companion .txt file or uploads via storage provider.
+    Bypasses file creation if Google Drive or Google Docs is in use (storage_backend == 'gdoc' or 'gdrive').
+    """
+    content = format_as_txt(parsed)
+
+    is_gdoc_mode = (
+        (config and getattr(config, "storage_backend", None) == "gdoc")
+        or (storage_provider and getattr(storage_provider, "storage_backend", None) == "gdoc")
+        or (storage_provider and getattr(storage_provider, "backend", None) == "gdoc")
+        or (parsed.file_path and str(parsed.file_path).endswith(".gdoc"))
+    )
+
+    if is_gdoc_mode:
+        p = Path(parsed.file_path)
+        return str(output_path or f"{p.stem}.txt")
+
+    if storage_provider is not None:
+        p = Path(parsed.file_path)
+        target_dir = Path(output_path).parent if output_path else p.parent
+        filename = Path(output_path).name if output_path else f"{p.stem}.txt"
+        return storage_provider.write_text(str(target_dir), filename, content)
+
     if output_path:
         out = Path(output_path)
     else:
+        p = Path(parsed.file_path)
         if parsed.questions_header_idx >= 0:
-            out = parsed.file_path.with_name(f"{parsed.file_path.stem}.snipper.txt")
+            out = p.with_name(f"{p.stem}.snipper.txt")
         else:
-            out = parsed.file_path.with_name(f"{parsed.file_path.stem}.txt")
+            out = p.with_name(f"{p.stem}.txt")
 
-    content = format_as_txt(parsed)
     out.write_text(content, encoding="utf-8")
     return out
+

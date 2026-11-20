@@ -1,0 +1,36 @@
+[project]
+name = "snipper"
+version = "0.4.0"
+description = "AI-assisted document analysis, semantic Word/Google Docs highlighting (snipper), and automated Draw.io mind mapping (mental-map)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "python-docx>=1.1.0",
+    "spacy>=3.7.0",
+    "PyYAML>=6.0.0",
+]
+
+[project.optional-dependencies]
+gdrive = [
+    "google-api-python-client>=2.100.0",
+    "google-auth-httplib2>=0.2.0",
+    "google-auth-oauthlib>=1.1.0",
+]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
+testpaths = [
+    ".agents/skills/snipper/scripts",
+    ".agents/skills/mental-map/scripts",
+]
+
+[tool.pyright]
+pythonVersion = "3.10"
+executionEnvironments = [
+    { root = ".agents/skills/mental-map/scripts", extraPaths = [".agents/skills/mental-map/scripts", ".agents/skills/snipper/scripts"] },
+    { root = ".agents/skills/snipper/scripts", extraPaths = [".agents/skills/snipper/scripts"] },
+]

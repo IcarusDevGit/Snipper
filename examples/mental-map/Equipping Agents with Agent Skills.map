@@ -1,0 +1,44 @@
+# Equipping Agents with Agent Skills.map
+
+**Anatomy of a Skill**
+Self-contained filesystem directory
+SKILL.md (Required)
+- YAML frontmatter
+  - name (lowercase, max 64 chars)
+  - description (routing trigger, max 1024 chars)
+- Markdown body with procedural workflows
+Optional Subdirectories
+- scripts/ for executable Python or Bash utilities
+- references/ for deep documentation loaded on demand
+- assets/ for templates, schemas, and resources
+
+**Progressive Disclosure**
+Prevents context window bloat across large skill libraries
+Three-Tier Loading Model
+- Tier 1: Discovery
+  - Pre-loads only name and description at startup
+- Tier 2: Activation
+  - Loads full SKILL.md body when prompt matches
+- Tier 3: Execution
+  - Reads references/ or runs scripts/ just-in-time
+
+**Code Execution & Authoring**
+Bridging language reasoning and deterministic code
+- Agent runs bundled scripts via shell
+- Only script output enters context window
+Best Practices
+- Start with evaluation tasks to find agent gaps
+- Keep SKILL.md concise and split large docs into references/
+- Refine naming and descriptions for accurate triggering
+- Iterate by reviewing real agent runs
+
+**Security & Auditing [horizontal]**
+- Trusted Sources:
+  - Estrutura: Only install skills authored or vetted by trusted creators
+  - Exemplo: Verified internal repos or official skill registries
+- Pre-Use Auditing:
+  - Estrutura: Inspect SKILL.md directives, bundled scripts, and dependencies
+  - Exemplo: Review network calls, shell commands, and file writes
+- Data Boundaries:
+  - Estrutura: Restrict external network access when handling sensitive data
+  - Exemplo: Sandboxed containers with least-privilege credentials

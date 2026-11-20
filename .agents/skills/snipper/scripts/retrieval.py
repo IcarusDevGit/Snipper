@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import re
 import sys
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
@@ -25,14 +25,15 @@ STOP_WORDS = {
 
 @dataclass
 class CandidateSnippet:
-    source_findings_path: Path
-    source_doc_path: Optional[Path]
+    source_findings_path: Union[Path, str]
+    source_doc_path: Optional[Union[Path, str]]
     target_id: str
     snippet_text: str
     paragraph_coord: str  # e.g. "P3"
     keywords: List[str] = field(default_factory=list)
     web_sources: List[str] = field(default_factory=list)
     score: float = 0.0
+
 
 
 def extract_paragraph_coordinates(body_txt: str, snippet: str) -> str:
@@ -95,33 +96,50 @@ def scan_scoped_findings(scope_result: ScopeResult) -> List[CandidateSnippet]:
     """Scans all .findings.json files in scope and builds candidate snippets."""
     findings_files = scope_result.get_scoped_findings_files()
     candidates: List[CandidateSnippet] = []
+    storage = getattr(scope_result, "storage_provider", None)
 
-    for f_path in findings_files:
+    for f_target in findings_files:
         try:
-            findings_data = FindingsData.from_file(f_path)
+            if storage is not None:
+                json_content = storage.read_text(f_target)
+                findings_data = FindingsData.from_json(json_content)
+            else:
+                findings_data = FindingsData.from_file(f_target)
         except Exception:
             continue
 
-        # Look for companion text file to resolve coordinates
-        doc_stem = f_path.stem.replace(".findings", "")
-        parent_dir = f_path.parent
-
-        companion_txt_candidates = [
-            parent_dir / f"{doc_stem}.txt",
-            parent_dir / f"{doc_stem}.snipper.txt",
-        ]
         body_txt = ""
-        for txt_c in companion_txt_candidates:
-            if txt_c.exists():
-                try:
-                    body_txt = txt_c.read_text(encoding="utf-8")
-                    break
-                except Exception:
-                    pass
+        source_doc = None
 
-        # Identify source docx path if present
-        docx_path = parent_dir / f"{doc_stem}.docx"
-        source_doc = docx_path if docx_path.exists() else None
+        if storage is not None and hasattr(storage, "_resolve_target"):
+            source_doc = str(f_target)
+            try:
+                # If target is DriveItem or path, locate companion txt
+                item = storage._resolve_target(f_target)
+                stem = item.name.replace(".findings.json", "").replace(".findings", "")
+                parent_id = item.parent_id or storage.library_folder_id
+                body_txt = storage.read_text(f"{stem}.txt")
+            except Exception:
+                pass
+        else:
+            f_path = Path(f_target)
+            doc_stem = f_path.stem.replace(".findings", "")
+            parent_dir = f_path.parent
+
+            companion_txt_candidates = [
+                parent_dir / f"{doc_stem}.txt",
+                parent_dir / f"{doc_stem}.snipper.txt",
+            ]
+            for txt_c in companion_txt_candidates:
+                if txt_c.exists():
+                    try:
+                        body_txt = txt_c.read_text(encoding="utf-8")
+                        break
+                    except Exception:
+                        pass
+
+            docx_path = parent_dir / f"{doc_stem}.docx"
+            source_doc = docx_path if docx_path.exists() else None
 
         for f in findings_data.findings:
             target_ids = getattr(f, "target_ids", [])
@@ -133,8 +151,8 @@ def scan_scoped_findings(scope_result: ScopeResult) -> List[CandidateSnippet]:
             for tid in target_ids:
                 candidates.append(
                     CandidateSnippet(
-                        source_findings_path=f_path,
-                        source_doc_path=source_doc,
+                        source_findings_path=f_target if isinstance(f_target, Path) else Path(str(f_target)),
+                        source_doc_path=source_doc if (source_doc is None or isinstance(source_doc, Path)) else Path(str(source_doc)),
                         target_id=tid,
                         snippet_text=f.snippet_text,
                         paragraph_coord=coord,
@@ -148,13 +166,14 @@ def scan_scoped_findings(scope_result: ScopeResult) -> List[CandidateSnippet]:
 
 def lookup_snippets(
     query: str,
-    target_path: Optional[Path | str] = None,
+    target_path: Optional[Union[Path, str]] = None,
     scope: Optional[str] = None,
     limit: Optional[int] = None,
-    library_root: Optional[Path | str] = None,
+    library_root: Optional[Union[Path, str]] = None,
+    storage_provider: Optional[Any] = None,
 ) -> Tuple[List[CandidateSnippet], ScopeResult]:
     """Executes snippet lookup within the resolved scope with conditional lexical pre-filtering."""
-    resolver = ScopeResolver(default_library_root=library_root)
+    resolver = ScopeResolver(default_library_root=library_root, storage_provider=storage_provider)
     scope_result = resolver.resolve(target_path=target_path, scope=scope, library_root=library_root)
 
     candidates = scan_scoped_findings(scope_result)
@@ -171,6 +190,7 @@ def lookup_snippets(
 
     # When limit is omitted, bypass lexical pre-filtering and return all candidates in scope
     return candidates, scope_result
+
 
 
 def format_snippet_card(index: int, candidate: CandidateSnippet) -> str:

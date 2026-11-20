@@ -1,0 +1,5 @@
+Q1: What is an Agent Skill?
+Q2: How to prevent context window bloat?
+Q3: How do Agent Skills combine natural-language instructions with executable scripts and code execution?
+O1: Identify the best practices recommended for authoring, structuring, and iterating on reliable skills.
+O2: Extract the security considerations and auditing practices required before using third-party skills.

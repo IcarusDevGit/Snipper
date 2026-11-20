@@ -7,6 +7,7 @@ if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
 from findings import (
+    Finding,
     FindingsData,
     format_superscript_citations,
     to_superscript_num,
@@ -109,6 +110,29 @@ def test_findings_with_target_ids():
     assert fd.unanswered_questions == [3]
 
 
+def test_findings_to_and_from_json():
+    fd = FindingsData(
+        findings=[
+            Finding(
+                question_numbers=[1],
+                target_ids=["Q1"],
+                snippet_text="In-memory serialized finding.",
+                keywords=["in-memory"],
+            )
+        ],
+        unanswered_targets=["O1"],
+        unanswered_questions=[2],
+    )
+
+    json_str = fd.to_json()
+    assert "in-memory" in json_str
+
+    deserialized = FindingsData.from_json(json_str)
+    assert len(deserialized.findings) == 1
+    assert deserialized.findings[0].snippet_text == "In-memory serialized finding."
+    assert deserialized.unanswered_targets == ["O1"]
+
+
 if __name__ == "__main__":
     with tempfile.TemporaryDirectory() as td:
         tpath = Path(td)
@@ -117,4 +141,6 @@ if __name__ == "__main__":
         test_findings_from_file(tpath)
         test_findings_with_keywords_and_concepts()
         test_findings_with_target_ids()
+        test_findings_to_and_from_json()
     print("Findings tests passed!")
+

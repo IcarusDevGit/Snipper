@@ -1,0 +1,227 @@
+<mxfile host="app.diagrams.net" agent="MentalMap" version="21.0.0" type="google">
+  <diagram id="MentalMap" name="Equipping Agents with Agent Skills">
+    <mxGraphModel dx="2560" dy="1564" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2160" pageHeight="1164" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <object id="header_banner" label="&lt;b&gt;EQUIPPING AGENTS WITH AGENT SKILLS&lt;/b&gt;&lt;br/&gt;&lt;font color=&apos;#94a3b8&apos; size=&apos;2&apos;&gt;Mapa Mental Conceitual &amp;bull; Síntese Estruturada&lt;/font&gt;" tooltip="Equipping Agents with Agent Skills">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0f172a;strokeColor=#1e293b;fontColor=#ffffff;fontStyle=1;fontSize=16;arcSize=8;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="80" y="40" width="2000" height="70" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="sub_sec_1" label="&lt;b&gt;1. Anatomy of a Skill&lt;/b&gt;" tooltip="Anatomy of a Skill">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0e7ff;strokeColor=#a5b4fc;fontColor=#3730a3;fontStyle=1;fontSize=14;arcSize=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="80" y="140" width="980" height="48" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="c_1_1" label="Self-contained filesystem directory">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cbd5e1;fontColor=#1e293b;fontSize=12;align=left;spacingLeft=12;spacingRight=12;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="80" y="202" width="980" height="40" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="c_1_2" label="SKILL.md (Required)">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#a5b4fc;fontColor=#1e293b;fontSize=12;fontStyle=1;align=center;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="80" y="256" width="200" height="198" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_1_1" label="YAML frontmatter">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf4ff;strokeColor=#f0abfc;fontColor=#86198f;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="325" y="256" width="345" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_1_2" label="name (lowercase, max 64 chars)">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fae8ff;strokeColor=#e879f9;fontColor=#701a75;fontSize=10;align=left;spacingLeft=8;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="715" y="304" width="345" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_1_3" label="description (routing trigger, max 1024 chars)">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fae8ff;strokeColor=#e879f9;fontColor=#701a75;fontSize=10;align=left;spacingLeft=8;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="715" y="352" width="345" height="54" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_1_4" label="Markdown body with procedural workflows">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf4ff;strokeColor=#f0abfc;fontColor=#86198f;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="325" y="416" width="345" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="c_1_3" label="Optional Subdirectories">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#a5b4fc;fontColor=#1e293b;fontSize=12;fontStyle=1;align=center;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="80" y="478" width="240" height="134" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_1_5" label="scripts/ for executable Python or Bash utilities">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf4ff;strokeColor=#f0abfc;fontColor=#86198f;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="365" y="478" width="695" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_1_6" label="references/ for deep documentation loaded on demand">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf4ff;strokeColor=#f0abfc;fontColor=#86198f;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="365" y="526" width="695" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_1_7" label="assets/ for templates, schemas, and resources">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf4ff;strokeColor=#f0abfc;fontColor=#86198f;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="365" y="574" width="695" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="sub_sec_2" label="&lt;b&gt;2. Progressive Disclosure&lt;/b&gt;" tooltip="Progressive Disclosure">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d1fae5;strokeColor=#6ee7b7;fontColor=#065f46;fontStyle=1;fontSize=14;arcSize=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="1100" y="140" width="980" height="48" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="c_2_4" label="Prevents context window bloat across large skill libraries">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cbd5e1;fontColor=#1e293b;fontSize=12;align=left;spacingLeft=12;spacingRight=12;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="1100" y="202" width="980" height="40" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="c_2_5" label="Three-Tier Loading Model">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#6ee7b7;fontColor=#1e293b;fontSize=12;fontStyle=1;align=center;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="1100" y="256" width="200" height="326" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_2_8" label="Tier 1: Discovery">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#a7f3d0;fontColor=#065f46;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="1345" y="256" width="345" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_2_9" label="Pre-loads only name and description at startup">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d1fae5;strokeColor=#34d399;fontColor=#047857;fontSize=10;align=left;spacingLeft=8;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="1735" y="304" width="345" height="54" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_2_10" label="Tier 2: Activation">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#a7f3d0;fontColor=#065f46;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="1345" y="368" width="345" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_2_11" label="Loads full SKILL.md body when prompt matches">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d1fae5;strokeColor=#34d399;fontColor=#047857;fontSize=10;align=left;spacingLeft=8;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="1735" y="416" width="345" height="54" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_2_12" label="Tier 3: Execution">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#a7f3d0;fontColor=#065f46;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="1345" y="480" width="345" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_2_13" label="Reads references/ or runs scripts/ just-in-time">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d1fae5;strokeColor=#34d399;fontColor=#047857;fontSize=10;align=left;spacingLeft=8;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="1735" y="528" width="345" height="54" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="sub_sec_3" label="&lt;b&gt;3. Code Execution &amp; Authoring&lt;/b&gt;" tooltip="Code Execution &amp; Authoring">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#fcd34d;fontColor=#92400e;fontStyle=1;fontSize=14;arcSize=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="80" y="691" width="980" height="48" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="c_3_6" label="Bridging language reasoning and deterministic code">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#fcd34d;fontColor=#1e293b;fontSize=12;fontStyle=1;align=center;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="80" y="753" width="240" height="86" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_3_14" label="Agent runs bundled scripts via shell">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fde68a;fontColor=#92400e;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="365" y="753" width="695" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_3_15" label="Only script output enters context window">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fde68a;fontColor=#92400e;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="365" y="801" width="695" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="c_3_7" label="Best Practices">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#fcd34d;fontColor=#1e293b;fontSize=12;fontStyle=1;align=center;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="80" y="863" width="240" height="182" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_3_16" label="Start with evaluation tasks to find agent gaps">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fde68a;fontColor=#92400e;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="365" y="863" width="695" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_3_17" label="Keep SKILL.md concise and split large docs into references/">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fde68a;fontColor=#92400e;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="365" y="911" width="695" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_3_18" label="Refine naming and descriptions for accurate triggering">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fde68a;fontColor=#92400e;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="365" y="959" width="695" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="b_3_19" label="Iterate by reviewing real agent runs">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fde68a;fontColor=#92400e;fontSize=11;align=left;spacingLeft=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="365" y="1007" width="695" height="38" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="sub_sec_4" label="&lt;b&gt;4. Security &amp; Auditing [horizontal]&lt;/b&gt;" tooltip="Security &amp; Auditing [horizontal]">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe4e6;strokeColor=#fda4af;fontColor=#9f1239;fontStyle=1;fontSize=14;arcSize=10;shadow=1;" vertex="1" parent="1">
+    <mxGeometry x="1100" y="691" width="980" height="48" as="geometry"/>
+  </mxCell>
+</object>
+        <object id="c_4_8" label="&lt;div style=&quot;text-align: center; font-size: 13px; font-weight: bold; color: #5b21b6; margin-bottom: 8px;&quot;&gt;SECURITY &amp; AUDITING&lt;/div&gt;&lt;table style=&quot;width: 100%; border-collapse: collapse; font-size: 11px; text-align: left;&quot; cellpadding=&quot;4&quot;&gt;&lt;thead&gt;&lt;tr style=&quot;background-color: #ede9fe; color: #4c1d95; font-weight: bold; border-bottom: 1px solid #c4b5fd;&quot;&gt;&lt;th style=&quot;padding: 6px 10px; width: 22%;&quot;&gt;Regra&lt;/th&gt;&lt;th style=&quot;padding: 6px 10px; width: 40%;&quot;&gt;Estrutura Lógica&lt;/th&gt;&lt;th style=&quot;padding: 6px 10px; width: 38%;&quot;&gt;Exemplo&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style=&quot;background-color: #ffffff; border-bottom: 1px solid #ede9fe;&quot;&gt;&lt;td style=&quot;padding: 6px 10px; font-weight: bold; color: #5b21b6; vertical-align: top; white-space: nowrap;&quot;&gt;Trusted Sources&lt;/td&gt;&lt;td style=&quot;padding: 6px 10px; color: #1e293b; vertical-align: top;&quot;&gt;Only install skills authored or vetted by trusted creators&lt;/td&gt;&lt;td style=&quot;padding: 6px 10px; color: #475569; font-size: 10px; vertical-align: top;&quot;&gt;Verified internal repos or official skill registries&lt;/td&gt;&lt;/tr&gt;&lt;tr style=&quot;background-color: #faf5ff; border-bottom: 1px solid #ede9fe;&quot;&gt;&lt;td style=&quot;padding: 6px 10px; font-weight: bold; color: #5b21b6; vertical-align: top; white-space: nowrap;&quot;&gt;Pre-Use Auditing&lt;/td&gt;&lt;td style=&quot;padding: 6px 10px; color: #1e293b; vertical-align: top;&quot;&gt;Inspect SKILL.md directives, bundled scripts, and dependencies&lt;/td&gt;&lt;td style=&quot;padding: 6px 10px; color: #475569; font-size: 10px; vertical-align: top;&quot;&gt;Review network calls, shell commands, and file writes&lt;/td&gt;&lt;/tr&gt;&lt;tr style=&quot;background-color: #ffffff; border-bottom: 1px solid #ede9fe;&quot;&gt;&lt;td style=&quot;padding: 6px 10px; font-weight: bold; color: #5b21b6; vertical-align: top; white-space: nowrap;&quot;&gt;Data Boundaries&lt;/td&gt;&lt;td style=&quot;padding: 6px 10px; color: #1e293b; vertical-align: top;&quot;&gt;Restrict external network access when handling sensitive data&lt;/td&gt;&lt;td style=&quot;padding: 6px 10px; color: #475569; font-size: 10px; vertical-align: top;&quot;&gt;Sandboxed containers with least-privilege credentials&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;" tooltip="Security &amp; Auditing [horizontal]">
+  <mxCell style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#fda4af;fontColor=#1e293b;fontSize=11;align=left;spacing=10;shadow=1;strokeWidth=1.5;" vertex="1" parent="1">
+    <mxGeometry x="1100" y="753" width="980" height="237" as="geometry"/>
+  </mxCell>
+</object>
+        <mxCell id="edge_1" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#6366f1;strokeWidth=2;fillColor=#6366f1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_1_2" target="b_1_1" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_2" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#a855f7;strokeWidth=2;fillColor=#a855f7;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="b_1_1" target="b_1_2" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_3" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#a855f7;strokeWidth=2;fillColor=#a855f7;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="b_1_1" target="b_1_3" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_4" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#6366f1;strokeWidth=2;fillColor=#6366f1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_1_2" target="b_1_4" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_5" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#6366f1;strokeWidth=2;fillColor=#6366f1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_1_3" target="b_1_5" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_6" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#6366f1;strokeWidth=2;fillColor=#6366f1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_1_3" target="b_1_6" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_7" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#6366f1;strokeWidth=2;fillColor=#6366f1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_1_3" target="b_1_7" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_8" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#10b981;strokeWidth=2;fillColor=#10b981;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_2_5" target="b_2_8" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_9" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#059669;strokeWidth=2;fillColor=#059669;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="b_2_8" target="b_2_9" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_10" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#10b981;strokeWidth=2;fillColor=#10b981;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_2_5" target="b_2_10" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_11" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#059669;strokeWidth=2;fillColor=#059669;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="b_2_10" target="b_2_11" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_12" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#10b981;strokeWidth=2;fillColor=#10b981;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_2_5" target="b_2_12" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_13" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#059669;strokeWidth=2;fillColor=#059669;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="b_2_12" target="b_2_13" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_14" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#f59e0b;strokeWidth=2;fillColor=#f59e0b;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_3_6" target="b_3_14" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_15" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#f59e0b;strokeWidth=2;fillColor=#f59e0b;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_3_6" target="b_3_15" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_16" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#f59e0b;strokeWidth=2;fillColor=#f59e0b;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_3_7" target="b_3_16" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_17" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#f59e0b;strokeWidth=2;fillColor=#f59e0b;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_3_7" target="b_3_17" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_18" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#f59e0b;strokeWidth=2;fillColor=#f59e0b;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_3_7" target="b_3_18" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+        <mxCell id="edge_19" style="edgeStyle=orthogonalEdgeStyle;curved=1;endArrow=classic;html=1;strokeColor=#f59e0b;strokeWidth=2;fillColor=#f59e0b;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="c_3_7" target="b_3_19" edge="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

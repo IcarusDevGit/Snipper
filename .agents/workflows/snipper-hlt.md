@@ -14,22 +14,22 @@ Optional: `--f <path/to/findings.json>`, `--dry-run`.
 ## Steps
 
 ### 1. Pre-Flight Checks
-1. Confirm Microsoft Word does not have `<name>.docx` open.
-2. Confirm `<name>.txt` exists as the ground-truth text backup.
+1. For Word (`.docx`): Confirm Microsoft Word does not have `<name>.docx` open, and `<name>.txt` exists as local backup.
+2. For Google Drive / Google Docs (`.gdoc`): Mutation is applied directly via Docs API batchUpdate. **No `.txt` files are needed or generated.**
 
 ### 2. Execution
 Run the highlighter CLI:
 ```bash
-python .agents/skills/snipper/scripts/cli.py hlt "<path/to/document.docx>"
+python .agents/skills/snipper/scripts/cli.py hlt "<path/to/document.docx_or_gdoc>"
 ```
 Or specify explicit findings:
 ```bash
-python .agents/skills/snipper/scripts/cli.py hlt "<path/to/document.docx>" --f "<path/to/findings.json>"
+python .agents/skills/snipper/scripts/cli.py hlt "<path/to/document.docx_or_gdoc>" --f "<path/to/findings.json>"
 ```
 
 ### 3. Verification & Idempotency
 - The mutator clears any previous summary block between `=== SNIPPER SUMMARY START ===` and `=== SNIPPER SUMMARY END ===`.
 - The mutator clears previous body run highlight and bold styles before reapplying mutations.
-- The summary block is prepended at paragraph 0 detailing target questions (`Q#`) and objectives (`O#`), keywords, concept definitions, and snippets with superscript citations (`Q¹`, `O¹`).
+- The summary block is prepended at paragraph 0 detailing target questions (`Q#`) and objectives (`O#`), bullet-point keywords, concept definitions, and spaced quoted snippets with superscript citations (`Q¹`, `O¹`) — without `Snippet:` prefix markers.
 - Keywords are highlighted across body paragraphs with target colors, and bolded inside answering snippets.
 - Document is saved in-place without duplicate `.backup.docx` bloat.

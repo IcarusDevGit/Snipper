@@ -14,12 +14,17 @@ Optional: `--q <path/to/questions.txt>`, `--out <path/to/findings.json>`.
 ## Steps
 
 ### 1. Ingestion & Companion Text Setup
-1. Identify the target document `<name>.docx`.
-2. Ensure `<name>.txt` companion file exists with spatial paragraph coordinates `[P#]`. If missing, generate it:
-   ```bash
-   python .agents/skills/snipper/scripts/cli.py dump "<path/to/document.docx>"
-   ```
-3. Locate `<name>.questions.txt` (or `--q <path>`). Parse all Questions (`Q#`) and Objectives (`O#`) with `- Keywords:` and `- Concepts:` sub-bullets.
+1. Identify the target document (`<name>.docx` or `<name>.gdoc`).
+2. **Local Word documents (`.docx`)**:
+   - Ensure `<name>.txt` companion file exists with spatial paragraph coordinates `[P#]`. If missing, generate it:
+     ```bash
+     python .agents/skills/snipper/scripts/cli.py dump "<path/to/document.docx>"
+     ```
+   - Locate `<name>.questions.txt` (or `--q <path>`).
+3. **Google Drive / Google Docs (`.gdoc`)**:
+   - **DO NOT generate or upload `.txt` or `.questions.txt` files.** Google Drive provides automatic revision history and cloud backup.
+   - Text is read directly in-memory via Google Docs API.
+   - Questions and objectives are read directly from `Questions.gdoc` or `<name>.questions.gdoc`. Parse Questions (`Q#`) and Objectives (`O#`) with `- Keywords:` and `- Concepts:` sub-bullets.
 
 ### 2. Concept Disambiguation (if applicable)
 1. For any concept marked `(web: true)`:

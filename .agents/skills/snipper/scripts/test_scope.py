@@ -143,7 +143,72 @@ def test_scope_global(tmp_path: Path):
     assert len(findings) == 3
 
 
+def test_scope_hierarchical_module_metadata_local(tmp_path: Path):
+    """Verifies that module.metadata with combined keywords and concepts is inherited in hierarchical scope."""
+    root = tmp_path / "lib"
+    root.mkdir(parents=True)
+    mod = root / "SecurityModule"
+    mod.mkdir(parents=True)
+    sub = mod / "IAM"
+    sub.mkdir(parents=True)
+    (sub / "doc.docx").write_text("content", encoding="utf-8")
+
+    # Combined metadata document
+    (mod / "module.metadata").write_text(
+        "# Keywords\n"
+        "ZeroTrust, RBAC, OAuth2\n\n"
+        "# Concepts\n"
+        "Least Privilege - Strict minimal access granted (Source: https://example.com/least-privilege)\n",
+        encoding="utf-8",
+    )
+
+    resolver = ScopeResolver(default_library_root=root)
+    res = resolver.resolve(sub / "doc.docx", scope="hierarchical")
+
+    assert res.scope_type == "hierarchical"
+    assert "ZeroTrust" in res.inherited_keywords
+    assert "RBAC" in res.inherited_keywords
+    assert "OAuth2" in res.inherited_keywords
+    assert len(res.inherited_concepts) == 1
+    assert res.inherited_concepts[0].name == "Least Privilege"
+    assert "https://example.com/least-privilege" in res.inherited_concepts[0].source_url
+
+
+def test_scope_hierarchical_module_metadata_remote():
+    """Verifies that module.metadata is discovered and parsed in memory over remote storage provider."""
+    from unittest.mock import MagicMock
+    from storage import DriveItem
+
+    mock_storage = MagicMock()
+    mock_storage.library_folder_id = "lib-root-id"
+
+    item = DriveItem(id="file-123", name="doc.gdoc", parent_id="sub-folder-id", is_folder=False)
+    mock_storage._resolve_target.return_value = item
+
+    def fake_exists(path):
+        return str(path) in ("ModuleCloud/module.metadata", "ModuleCloud/module.metadata.gdoc")
+
+    mock_storage.exists.side_effect = fake_exists
+    mock_storage.read_text.return_value = (
+        "## Keywords\n"
+        "CloudSecurity, KMS\n\n"
+        "## Concepts\n"
+        "Envelope Encryption: Encrypting data key with master key (Source: https://cloud.google.com/kms)\n"
+    )
+
+    resolver = ScopeResolver(storage_provider=mock_storage)
+    res = resolver.resolve("ModuleCloud/SubFolder/doc.gdoc", scope="hierarchical")
+
+    assert res.scope_type == "hierarchical"
+    assert "CloudSecurity" in res.inherited_keywords
+    assert "KMS" in res.inherited_keywords
+    assert len(res.inherited_concepts) == 1
+    assert res.inherited_concepts[0].name == "Envelope Encryption"
+    assert "https://cloud.google.com/kms" in res.inherited_concepts[0].source_url
+
+
 if __name__ == "__main__":
+    import tempfile
     with tempfile.TemporaryDirectory() as td:
         tpath = Path(td)
         test_scope_local_submodule(tpath)

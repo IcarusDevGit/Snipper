@@ -109,6 +109,9 @@ class SnipperConfig:
     palette_mode: str = "hex"
     palette_order: str = "sequential"
     palette: List[str] = field(default_factory=lambda: list(DEFAULT_PALETTE))
+    storage_backend: str = "local"
+    library_folder_id: Optional[str] = None
+    metadata_filename: str = "module.metadata"
 
     @classmethod
     def from_file(
@@ -141,6 +144,18 @@ class SnipperConfig:
             else:
                 active_palette = file_palette
 
+            # Storage configuration (flat or nested)
+            storage_dict = cfg.get("storage", {}) if isinstance(cfg.get("storage"), dict) else {}
+            storage_backend = str(
+                cfg.get("storage_backend", storage_dict.get("backend", "local"))
+            ).lower().strip()
+            library_folder_id = cfg.get("library_folder_id", storage_dict.get("library_folder_id"))
+            if library_folder_id is not None:
+                library_folder_id = str(library_folder_id).strip()
+            metadata_filename = str(
+                cfg.get("metadata_filename", storage_dict.get("metadata_filename", "module.metadata"))
+            ).strip()
+
             return cls(
                 language=str(cfg.get("language", "auto")).strip(),
                 allow_web_search=bool(cfg.get("allow_web_search", False)),
@@ -148,6 +163,9 @@ class SnipperConfig:
                 palette_mode=str(cfg.get("palette_mode", "hex")).lower().strip(),
                 palette_order=str(cfg.get("palette_order", "sequential")).lower().strip(),
                 palette=active_palette,
+                storage_backend=storage_backend,
+                library_folder_id=library_folder_id,
+                metadata_filename=metadata_filename,
             )
         except Exception:
             return cls(palette=file_palette)

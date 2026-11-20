@@ -70,7 +70,7 @@ Execute the decoupled Snipper v0.4 pipeline: extract semantic answer snippets fo
 2. What the mutator executes:
    - Identifies and strips any existing summary block between `=== SNIPPER SUMMARY START ===` and `=== SNIPPER SUMMARY END ===`.
    - Clears existing highlight and bold styling from body paragraphs.
-   - Prepends fresh summary block at paragraph 0 detailing target questions, objectives, keywords, concept definitions, sources, and snippets with superscript citations (`Q¹`, `O¹`).
+   - Prepends fresh summary block at paragraph 0 detailing target questions, objectives, bullet-point keywords, concept definitions, sources, and spaced quoted snippets with superscript citations (`Q¹`, `O¹`) — without `Snippet:` prefix markers.
    - Highlights keywords across the body text in the target's assigned color; bolds keywords inside answering snippet spans.
    - Saves mutated document in-place.
 
