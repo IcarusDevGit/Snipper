@@ -289,3 +289,27 @@ def test_parse_document_missing_file_raises(tmp_path):
         parse_document(missing)
 
 
+def test_chained_bullet_arrows_horizontally_aligned():
+    """Verify single-child nested bullets align vertically with their parent so arrows stay horizontal."""
+    sample = """# Chained Alignment
+**Sec 1**
+Model
+- Tier 1
+  - Detail 1
+- Tier 2
+  - Detail 2
+"""
+    model = parse_markdown_or_text(sample)
+    layout = build_layout(model)
+    by_label = {n.label: n for n in layout.nodes}
+
+    t1, d1 = by_label["Tier 1"], by_label["Detail 1"]
+    t2, d2 = by_label["Tier 2"], by_label["Detail 2"]
+
+    # Centers of Tier -> Detail must match within 1px integer rounding
+    assert abs((t1.y + t1.height / 2) - (d1.y + d1.height / 2)) <= 1.0
+    assert abs((t2.y + t2.height / 2) - (d2.y + d2.height / 2)) <= 1.0
+    # Tier 2 must sit cleanly below Tier 1 and Detail 1
+    assert t2.y >= max(t1.y + t1.height, d1.y + d1.height)
+
+

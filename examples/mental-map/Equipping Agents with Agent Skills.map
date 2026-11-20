@@ -32,7 +32,8 @@ Best Practices
 - Refine naming and descriptions for accurate triggering
 - Iterate by reviewing real agent runs
 
-**Security & Auditing [horizontal]**
+**Security & Auditing**
+Security & Auditing [horizontal]
 - Trusted Sources:
   - Estrutura: Only install skills authored or vetted by trusted creators
   - Exemplo: Verified internal repos or official skill registries

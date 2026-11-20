@@ -352,20 +352,63 @@ def build_layout(model: MentalMapModel) -> DiagramLayout:
                             tier_widths[lvl] = tier_w
                             tier_offsets[lvl] = parent_w + arrow_gap + lvl * (tier_w + arrow_gap)
 
-                    # Layout bullets vertically
-                    b_y_cursor = curr_y
+                    # Build parent->children map for hierarchical tree layout so chained arrows stay aligned
+                    bullet_by_id = {b.id: b for b in all_bullets}
+                    children_map: Dict[str, List[BulletNode]] = {b.id: [] for b in all_bullets}
+                    root_bullets: List[BulletNode] = []
+                    for b in all_bullets:
+                        if b.parent_id and b.parent_id in bullet_by_id and b.parent_id != b.id:
+                            children_map[b.parent_id].append(b)
+                        else:
+                            root_bullets.append(b)
+
+                    bullet_gap = 10
+                    own_heights: Dict[str, int] = {}
+                    subtree_heights: Dict[str, int] = {}
+
+                    def _compute_heights(node: BulletNode) -> int:
+                        b_w = tier_widths.get(node.nesting_level, 200)
+                        own_h = calculate_card_height(node.text, b_w, base_padding=18, min_height=38)
+                        own_heights[node.id] = own_h
+                        kids = children_map[node.id]
+                        if not kids:
+                            subtree_heights[node.id] = own_h
+                            return own_h
+                        kids_total_h = sum(_compute_heights(k) for k in kids) + bullet_gap * (len(kids) - 1)
+                        sub_h = max(own_h, kids_total_h)
+                        subtree_heights[node.id] = sub_h
+                        return sub_h
+
+                    for rb in root_bullets:
+                        _compute_heights(rb)
+
                     bullet_layout_items: List[Tuple[BulletNode, int, int, int, int]] = []
 
-                    for b in all_bullets:
-                        b_lvl = b.nesting_level
+                    def _place_subtree(node: BulletNode, y_top: int) -> None:
+                        b_lvl = node.nesting_level
                         b_w = tier_widths.get(b_lvl, 200)
                         b_x = sec_x + tier_offsets.get(b_lvl, parent_w + arrow_gap)
-                        b_h = calculate_card_height(b.text, b_w, base_padding=18, min_height=38)
+                        own_h = own_heights[node.id]
+                        sub_h = subtree_heights[node.id]
 
-                        bullet_layout_items.append((b, b_x, b_y_cursor, b_w, b_h))
-                        b_y_cursor += b_h + 10
+                        # Vertically center node within its subtree band so single-child arrows are straight
+                        b_y = y_top + (sub_h - own_h) // 2
+                        bullet_layout_items.append((node, b_x, b_y, b_w, own_h))
 
-                    total_bullets_h = max(40, b_y_cursor - curr_y - 10)
+                        kids = children_map[node.id]
+                        if kids:
+                            kids_total_h = sum(subtree_heights[k.id] for k in kids) + bullet_gap * (len(kids) - 1)
+                            kid_y = y_top + (sub_h - kids_total_h) // 2
+                            for kid in kids:
+                                _place_subtree(kid, kid_y)
+                                kid_y += subtree_heights[kid.id] + bullet_gap
+
+                    b_y_cursor = curr_y
+                    for rb in root_bullets:
+                        _place_subtree(rb, b_y_cursor)
+                        b_y_cursor += subtree_heights[rb.id] + bullet_gap
+
+                    total_bullets_h = max(40, b_y_cursor - curr_y - bullet_gap)
                     parent_h = max(calculate_card_height(concept.text, parent_w, min_height=45), total_bullets_h)
 
                     # Add parent card
